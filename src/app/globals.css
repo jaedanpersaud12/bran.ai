@@ -1,0 +1,356 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/*
+ * Beautiful UI's foundation (beautifului.dev, MIT), installed through their
+ * shadcn registry. It carries the tokens and utilities its primitives are
+ * built on — `text-ink`, `bg-surface`, `border-line`, `shadow-card`.
+ *
+ * It sits above our own `:root` on purpose. Two of its value tokens were
+ * renamed on the way in (`--line` and `--accent`, which mean a hairline and a
+ * fixed blue there, and the chart's ink and the section tint here) and its
+ * font mappings dropped, so the two systems can share a page without either
+ * silently repointing the other.
+ */
+@import "./beautifui/foundation.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * flvs.bran runs on its own palette, not the storefront's.
+ *
+ * FLVS is cream and red. A dense analytics screen on that ground turns every
+ * figure into a warm smudge, and red stops meaning "down" the moment it is
+ * also the furniture. So this is a near-white neutral system, and brand red
+ * survives in exactly one place: the product mark.
+ */
+:root {
+  --flvs-red: #d42a1e;
+
+  --background: #ffffff;
+  --foreground: #17171a;
+  --card: #ffffff;
+  --card-foreground: #17171a;
+  --popover: #ffffff;
+  --popover-foreground: #17171a;
+  --primary: #17171a;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f2;
+  --secondary-foreground: #17171a;
+  --muted-neutral: #f6f6f4;
+  --muted: var(--muted-neutral);
+  --muted-foreground: #737370;
+  --accent-neutral: #f1f1ee;
+  --accent: var(--accent-neutral);
+  --accent-foreground: #17171a;
+  --destructive: #c2312b;
+  --border-neutral: #e8e7e3;
+  --border: var(--border-neutral);
+  --input: #dedcd6;
+  --ring: #17171a;
+  --radius: 0.625rem;
+
+  --sidebar-neutral: #fbfaf8;
+  --sidebar: var(--sidebar-neutral);
+  --sidebar-foreground: #17171a;
+  --sidebar-primary: #17171a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--accent-neutral);
+  --sidebar-accent-foreground: #17171a;
+  --sidebar-border: var(--border-neutral);
+  --sidebar-ring: #17171a;
+
+  /*
+   * Direction, not decoration. Both are darker than the usual dashboard green
+   * and red so a 13px delta still clears 4.5:1 on white — and neither is ever
+   * the only signal: an arrow points the same way.
+   */
+  --positive: #0a7c3f;
+  --negative: #c2312b;
+
+  /* The data ink. One step lighter than `--foreground`, so a plotted line
+     reads as a value rather than as heading-weight type. */
+  --line: #3f3f43;
+  /* The unfilled half of any meter: a track, not a value. */
+  --track: #e6e5e1;
+  /* Three steps of one grey for parts of a whole, ordered light to dark so the
+     ramp itself carries the ranking. */
+  --step-1: #a8a7a1;
+  --step-2: #57564f;
+  --step-3: #24231f;
+
+  /*
+   * The eight destinations, each with a colour of its own.
+   *
+   * A nav is the one place on this screen where colour earns its keep: eight
+   * targets that never move and get scanned dozens of times a day, where a
+   * hue is found faster than a shape. So these are eight different colours
+   * rather than eight samples of one — far enough apart to be named out loud,
+   * and none of them a near-miss of its neighbour in the list.
+   *
+   * Every ink clears 4.7:1 on the sidebar and 4.2:1 on its own hover tint, so
+   * a row stays legible at the moment it lights up. Nothing here sits in the
+   * brand's orange-red: that is the product mark and a falling delta, and it
+   * would read as an alarm on a nav row.
+   *
+   * These are the only saturated values in the system. Everything downstream —
+   * the hover behind a row, the ground behind the panel, every hairline and
+   * focus ring on the page — is mixed from the one the section owns, so the
+   * whole app answers to where you are.
+   */
+  --nav-dashboard: #4f46e5;
+  --nav-calendar: #0e7490;
+  --nav-campaigns: #c2410c;
+  --nav-analytics: #7c3aed;
+  --nav-team: #047857;
+  --nav-integrations: #a16207;
+  --nav-inventory: #0369a1;
+  --nav-orders: #be123c;
+  --nav-storefronts: #0f766e;
+  /* Billing is deliberately the quiet one. It is the only section nobody
+     opens to do work, and a saturated hue on it would keep advertising a
+     screen the brand owner visits once a month. */
+  --nav-billing: #334155;
+  --nav-help: #a21caf;
+  --nav-docs: #4d7c0f;
+
+  /*
+   * Depth as layered transparency rather than a solid line.
+   *
+   * A border colour is picked against one background and is wrong on every
+   * other; these layers are transparent, so a panel keeps the same weight on
+   * white, on the sidebar's off-white, and over an image. Dividers and
+   * hairlines stay real borders — this is only for things meant to sit above
+   * the page.
+   */
+  --depth-border:
+    0px 0px 0px 1px oklch(0 0 0 / 0.06),
+    0px 1px 2px -1px oklch(0 0 0 / 0.06),
+    0px 2px 4px 0px oklch(0 0 0 / 0.04);
+}
+
+@theme inline {
+  --shadow-border: var(--depth-border);
+  --color-flvs-red: var(--flvs-red);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  /* No `--color-line` mapping here on purpose. `--line` is the chart's ink
+     and the charts read it raw as `var(--line)`; mapping it to a utility
+     as well would win the cascade over Beautiful UI's own `--color-line`,
+     and every `border-line` and `bg-line` in their primitives would draw
+     a near-black hairline instead of a faint one. */
+  --color-track: var(--track);
+  --color-step-1: var(--step-1);
+  --color-step-2: var(--step-2);
+  --color-step-3: var(--step-3);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+html {
+  /* Reserve the scrollbar's width whether or not the page needs one, so the
+     panel does not step sideways between a short screen and a long one. */
+  scrollbar-gutter: stable;
+}
+
+body {
+  /* Overscroll on a trackpad exposes the body behind the app. Matching the
+     sidebar means the rubber band shows the app's own ground. */
+  background: var(--sidebar);
+}
+
+/*
+ * Motion.
+ *
+ * One scale, referenced everywhere, so nothing on the screen moves on a
+ * number somebody typed in a hurry. These are the transitions.dev tokens.
+ */
+:root {
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+}
+
+/*
+ * Every chart arrives by drawing itself.
+ *
+ * These are keyframes rather than JS-triggered transitions, and that is the
+ * whole design. The obvious build — flip a flag after mount and transition
+ * from a hidden start — leaves the panel blank until hydration runs, so a
+ * slow connection trades a nice entrance for a white screen. An animation
+ * with `both` fill starts at first paint, needs no JavaScript, and leaves the
+ * server-rendered markup readable the entire way.
+ *
+ * This is the one place keyframes beat a transition: a staged sequence that
+ * runs once and is never interrupted. Everything that responds to a pointer
+ * stays a transition, below.
+ */
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * The dial. One animation on the group that holds both arcs — `view-box` is
+ * what lets `50% 50%` mean the middle of the drawing rather than the middle
+ * of the group's own bounding box.
+ */
+.dial {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: bloom var(--duration-very-slow) var(--ease-smooth-out) both;
+  /* Colour stays a transition: the split can move after the ring has landed,
+     and that change has to be interruptible. */
+  transition: stroke var(--duration-medium) var(--ease-in-out);
+}
+
+/* The customer meter, filling left to right in one pass. */
+@keyframes wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.wipe {
+  animation: wipe var(--duration-slow) var(--ease-smooth-out) both;
+}
+
+/* A part of the budget bar — unrolls from its own left edge. */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.segment {
+  transform-origin: left;
+  animation: grow-x var(--duration-very-slow) var(--ease-smooth-out) both;
+}
+
+/*
+ * A block arriving in the assistant's thread.
+ *
+ * Each stage of an agent run appears when it actually happens rather than the
+ * whole transcript landing at once, so every block needs its own entrance —
+ * short, because these arrive while you are already reading.
+ */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.step-in {
+  animation: step-in var(--duration-medium) var(--ease-smooth-out) both;
+}
+
+/*
+ * Reduced motion takes away the travel, not the information. Everything still
+ * arrives at its final state — instantly, and all at once, with no stagger
+ * left to imply a sequence nobody asked to watch.
+ */
+/*
+ * Where you are, spread across the page.
+ *
+ * `AppShell` puts the current section's colour on the app wrapper as
+ * `--section`, and these rules re-point the neutrals underneath it: the ground
+ * the panel floats on, every hairline, the muted fills, the hover behind a
+ * toolbar button, the focus ring. Nothing here names a component, so anything
+ * built later inherits the tint by using the tokens it was going to use
+ * anyway — and a route with no nav entry sets no attribute and stays grey.
+ *
+ * The percentages are small on purpose. This should read as the room having a
+ * different light in it, not as eight themes: the figures, the plotted line
+ * and the delta colours are all deliberately left out of it, because they mean
+ * something, and what they mean does not change with the section you are in.
+ */
+[data-section] {
+  --sidebar: color-mix(in oklab, var(--section) 4%, var(--sidebar-neutral));
+  --sidebar-accent: color-mix(in oklab, var(--section) 12%, var(--sidebar-neutral));
+  --sidebar-accent-foreground: color-mix(in oklab, var(--section) 42%, var(--foreground));
+  --sidebar-border: color-mix(in oklab, var(--section) 14%, var(--border-neutral));
+  --sidebar-ring: var(--section);
+
+  --border: color-mix(in oklab, var(--section) 12%, var(--border-neutral));
+  --muted: color-mix(in oklab, var(--section) 7%, var(--muted-neutral));
+  --accent: color-mix(in oklab, var(--section) 10%, var(--accent-neutral));
+  --accent-foreground: color-mix(in oklab, var(--section) 45%, var(--foreground));
+  --ring: var(--section);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial,
+  .wipe,
+  .segment,
+  .step-in {
+    animation: none;
+    transition: none;
+  }
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
