@@ -51,7 +51,7 @@ export function DashboardView({
   const subscriptionShare = REVENUE_SPLIT.parts[0].amount / REVENUE_SPLIT.total;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 pb-6">
         <h1 className="text-[28px] leading-none font-semibold tracking-[-0.02em]">
           {greeting}

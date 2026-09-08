@@ -26,7 +26,7 @@ export default function ContentCalendarPage() {
   const approvals = POSTS.filter((post) => post.state === "needs approval").length;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Content Calendar"
         blurb="What is going out this week, across every channel. The assistant drafts from the pieces you are restocking, so a post and the stock behind it are never out of step."

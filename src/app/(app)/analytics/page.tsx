@@ -30,7 +30,7 @@ export default function AnalyticsPage() {
   const movers = [...STOCK].sort((a, b) => b.forecast14 - a.forecast14).slice(0, 5);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Analytics"
         blurb={`Everything the workspace recorded between ${formatRange(start, end)}.`}

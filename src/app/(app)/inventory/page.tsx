@@ -47,7 +47,7 @@ export default function InventoryPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Inventory"
         blurb="Every line, ordered by how long it has left. The model reads the last ninety days of sales, what is already on a purchase order, and what the calendar is about to promote."

@@ -27,7 +27,7 @@ export default function CampaignsPage() {
   const orders = running.reduce((sum, campaign) => sum + campaign.orders, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Campaigns"
         blurb="Drops and promotions, and the orders each one is responsible for. Attribution follows the order back to the post or ad the customer arrived from."

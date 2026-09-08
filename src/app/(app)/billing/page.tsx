@@ -17,7 +17,7 @@ export default function BillingPage() {
   const current = PLANS.find((plan) => plan.current);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Billing"
         blurb="What this workspace is on, what it has used, and what the other tiers carry."

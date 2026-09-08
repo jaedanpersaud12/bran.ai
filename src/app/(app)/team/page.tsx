@@ -15,7 +15,7 @@ export const metadata = { title: "Team — bran" };
  */
 export default function TeamPage() {
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Team"
         blurb="Everyone with access to FLVS Swim. Accounts are shared with the storefront, so a person signs in once and lands wherever their role allows."

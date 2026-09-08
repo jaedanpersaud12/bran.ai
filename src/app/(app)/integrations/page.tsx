@@ -18,7 +18,7 @@ export default function IntegrationsPage() {
   const connected = INTEGRATIONS.filter((item) => item.connected);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Integrations"
         blurb="What bran is plugged into. Couriers collect from the orders queue, payment providers settle in TTD, and channels feed both the calendar and the assistant."

@@ -20,7 +20,7 @@ export default function StorefrontsPage() {
   const dmOrders = live.reduce((sum, store) => sum + store.orders30 * store.fromDm, 0);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <div className="w-full">
       <PageHeader
         title="Storefronts"
         blurb="One workspace can carry more than one label. Each gets its own storefront, its own handle and its own numbers, drawing on shared inventory underneath."
