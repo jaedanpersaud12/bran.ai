@@ -35,6 +35,17 @@ export function model() {
   return deepSeek(modelId);
 }
 
+/**
+ * The model for images. `deepseek-v4-flash` is text-only; DeepSeek serves
+ * images through an experimental vision variant (provider docs). Only 07's
+ * photo import uses it.
+ */
+export const visionModelId = process.env.AI_VISION_MODEL || "deepseek-v4-flash-vision-exp";
+
+export function visionModel() {
+  return deepSeek(visionModelId);
+}
+
 /** Provider options every call passes along. */
 export const callOptions = {
   providerOptions: {

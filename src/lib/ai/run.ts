@@ -21,23 +21,29 @@ export async function runAI<T>({
   feature,
   workspaceId,
   call,
+  timeoutMs = TIMEOUT_MS,
+  model = modelId,
 }: {
   /** Short, stable name for the ai_runs log: `restock-explain`, later `dm-reply`. */
   feature: string;
   workspaceId: string | null;
   call: (signal: AbortSignal) => Promise<{ value: T; usage?: Usage }>;
+  /** Overrides the 15s default for calls that read a whole document. */
+  timeoutMs?: number;
+  /** The model id to log, when the call used another model than the default. */
+  model?: string;
 }): Promise<T | null> {
   if (!aiConfigured) return null;
 
   const started = Date.now();
   try {
-    const { value, usage } = await call(AbortSignal.timeout(TIMEOUT_MS));
-    await logRun({ feature, workspaceId, ok: true, usage, ms: Date.now() - started });
+    const { value, usage } = await call(AbortSignal.timeout(timeoutMs));
+    await logRun({ feature, workspaceId, model, ok: true, usage, ms: Date.now() - started });
     return value;
   } catch (error) {
     const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     console.error(`AI call "${feature}" failed`, message);
-    await logRun({ feature, workspaceId, ok: false, error: message, ms: Date.now() - started });
+    await logRun({ feature, workspaceId, model, ok: false, error: message, ms: Date.now() - started });
     return null;
   }
 }
@@ -49,6 +55,7 @@ export async function runAI<T>({
 export async function logRun(run: {
   feature: string;
   workspaceId: string | null;
+  model?: string;
   ok: boolean;
   error?: string;
   usage?: Usage;
@@ -59,7 +66,7 @@ export async function logRun(run: {
     await sql`
       insert into bran.ai_runs
         (workspace_id, feature, model, ok, error, input_tokens, output_tokens, duration_ms)
-      values (${run.workspaceId}, ${run.feature}, ${modelId}, ${run.ok},
+      values (${run.workspaceId}, ${run.feature}, ${run.model ?? modelId}, ${run.ok},
               ${run.error?.slice(0, 500) ?? null}, ${run.usage?.inputTokens ?? null},
               ${run.usage?.outputTokens ?? null}, ${run.ms})
     `;

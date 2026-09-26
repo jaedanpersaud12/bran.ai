@@ -58,9 +58,15 @@ Verified against the bundled docs in `node_modules/ai/docs` and
 - **The DeepSeek provider appends the JSON schema to the messages** in structured-output
   mode — a stand-in server that parses the prompt must look for its own markers, not the
   first `[`.
-- **Images:** `deepseek-v4-flash` is text-only. The provider docs route images through
-  `deepseek-v4-flash-vision-exp` (experimental) with file parts and
-  `providerOptions.deepseek.imageDetail`. Treat it as unproven until 07 tests it.
+- **Images:** `deepseek-v4-flash` is text-only. Images go to `deepseek-v4-flash-vision-exp`
+  (experimental) as a `{ type: "file", mediaType, data: Uint8Array }` part; `visionModel()`
+  in `model.ts` returns it (`AI_VISION_MODEL` overrides). Tested in 07 on a printed price
+  list (flat and a simulated phone photo): every value right across three runs, ~2.8s,
+  ~1k tokens in. Structured output works on it, in the same schema-in-the-system-message
+  compatibility mode (an AI SDK warning says so). Thinking-off `providerOptions` are accepted.
+  A footnote detail (a retail price below the table) was read in some runs and not others.
+- **`runAI` options:** `timeoutMs` (default 15s; import uses 60s) and `model` (the id to log
+  when the call didn't use the default model — the vision calls pass `visionModelId`).
 - **Agents (06):** `new ToolLoopAgent({ model, instructions, tools, toolApproval,
   experimental_toolApprovalSecret, stopWhen: isStepCount(n), onEnd })`, built **per
   request** so tools close over the session's workspace. In v7 approval is the agent's
@@ -96,6 +102,28 @@ Installed 2026-09-26 for 06: `conversation`, `message`, `prompt-input`, `tool`,
   Assistant in the sidebar the dev bundle went from ~6 MB to 17.4 MB and pages stopped
   hydrating in a background tab. bran strips the plugins (`streamdownPlugins = {}`) and
   loads the chat with `next/dynamic` when the sheet opens.
+- **`attachments`** (added in 07): installed clean onto tokens except one
+  `dark:hover:` class (removed; bran is light-only) and two `<img>` lint warnings (blob/data
+  URLs; annotated). Inside `PromptInput`, list the files with `usePromptInputAttachments()`
+  and render `Attachments`/`Attachment` in a `PromptInputHeader`.
+- **`prompt-input` quirks:** without `PromptInputProvider` it `form.reset()`s the textarea
+  *before* awaiting `onSubmit`, so a failed submit loses what was typed; wrap it in the
+  provider and throw from `onSubmit` to keep the input. Enter submits (Shift+Enter is a
+  newline). The input group has `has-disabled:opacity-50`, so disabling any one control in
+  it fades the whole box — hide a control rather than disabling it. Files arrive in
+  `onSubmit` as data URLs. `PromptInputProvider` takes `initialInput` (text only); to put a
+  file back, call `usePromptInputAttachments().add([file])` once on mount.
+
+## Next.js Server Actions
+
+- **Body limit is 1 MB by default** (`serverActions.bodySizeLimit`, not raised here). Over
+  it, the request is rejected before the action runs and the client's call just throws —
+  the action's own size checks never see it. Anything sending an image through an action
+  has to size it in the browser first (07 steps a canvas JPEG down until the data URL is
+  ≤850k characters).
+- **An env var that's set, even to an empty string, beats `.env.local`** (`@next/env` only
+  fills keys that are undefined). `env DEEPSEEK_API_KEY= pnpm exec next start` gives a
+  production server with AI off — the `bran-prod-noai` launch config.
 - **Testing:** pure modules take `model: LanguageModel` as an argument; tests pass
   `new MockLanguageModelV4({ doGenerate })` from `ai/test` and run under `node --test`.
 - **Model output is never trusted to decide.** It explains numbers the app computed;

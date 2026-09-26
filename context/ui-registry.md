@@ -51,3 +51,27 @@ Last updated: 2026-09-26
 **Pattern notes:** Any "one field people change constantly" editor should match this: the
 input selects its contents on open (typing replaces, never appends), Enter saves, Escape
 and blur cancel, the value is optimistic and rolls back with the reason on failure.
+
+### Review table in a modal (catalog import)
+
+File: src/components/bran/CatalogImport.tsx (`Review`)
+Last updated: 2026-09-26
+Built from: shadcn dialog, input, checkbox; @ja3dan/status-pill; AI Elements prompt-input, attachments
+
+| Property        | Value                                                                        |
+| --------------- | ---------------------------------------------------------------------------- |
+| Modal width     | `sm:max-w-lg` for the input step, `sm:max-w-6xl` once there's a table        |
+| Table frame     | `max-h-[55vh] overflow-auto rounded-lg border border-border`, `table-fixed`, `<colgroup>` widths |
+| Header          | `sticky top-0 bg-muted text-[11px] font-medium text-muted-foreground`         |
+| Cells           | every cell an `Input` `h-8 px-2 text-xs`, `aria-label="{Column}, row N"`      |
+| Cell note       | `text-[11px] leading-tight` under the input: `text-negative` error, else `text-muted-foreground` note ("New product", "Suggested by bran") |
+| Discarded row   | inputs `disabled` (the shadcn input fades itself); notes hidden               |
+| Footer          | "N of M ticked rows are ready" (`tabular-nums`, `mr-auto`) · Back · `LoadingButton` "Import M" |
+| AI marker       | `AiMark label="Read by AI"` after the row count, not a banner                 |
+
+**Pattern notes:** For any "AI drafted it, you check it" batch: one row per record, all
+cells editable, a keep checkbox, the same parser the server runs checking on every
+keystroke, and the primary action disabled until every kept row is clean. The server's
+errors are merged over the client's per row and cleared when that row is edited. The
+page-level fixed-height/pager rules don't apply inside a modal.
+

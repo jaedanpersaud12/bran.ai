@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useOptimistic, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import {
   Archive,
   ArchiveRestore,
+  FileUp,
   MoreHorizontal,
   Package,
   Pencil,
@@ -40,6 +42,12 @@ import {
 } from "@/components/ui/table-card";
 import type { CatalogRow } from "@/lib/catalog";
 
+/** Loaded on first open, so AI Elements doesn't ship with the catalogue (see CatalogImport). */
+const CatalogImport = dynamic(
+  () => import("@/components/bran/CatalogImport").then((module) => module.CatalogImport),
+  { ssr: false },
+);
+
 const COLUMNS = ["w-64", "w-44", "w-28", "w-28", "w-28", "w-24", "", "w-14"] as const;
 
 /**
@@ -51,8 +59,10 @@ const COLUMNS = ["w-64", "w-44", "w-28", "w-28", "w-28", "w-24", "", "w-14"] as 
  * revalidate this page; the rows prop is always the server's copy, and the
  * only local state is what's being typed.
  */
-export function CatalogTable({ rows }: { rows: CatalogRow[] }) {
+export function CatalogTable({ rows, canImport }: { rows: CatalogRow[]; canImport: boolean }) {
   const [query, setQuery] = useState("");
+  // Mounted from the first open on, so closing it can animate out.
+  const [importing, setImporting] = useState<boolean | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [dialog, setDialog] = useState<DialogState>(null);
 
@@ -111,6 +121,10 @@ export function CatalogTable({ rows }: { rows: CatalogRow[] }) {
             {/* htmlFor, not wrapping: a label around a button-based switch doesn't name it. */}
             <label htmlFor="show-archived">Show archived</label>
           </div>
+          <Button size="sm" variant="outline" onClick={() => setImporting(true)}>
+            <FileUp />
+            Import
+          </Button>
           <Button size="sm" onClick={() => setDialog({ kind: "create-product" })}>
             <Plus />
             Add product
@@ -210,6 +224,14 @@ export function CatalogTable({ rows }: { rows: CatalogRow[] }) {
       </TableCard>
 
       <CatalogDialog state={dialog} onClose={() => setDialog(null)} />
+      {importing === null ? null : (
+        <CatalogImport
+          open={importing}
+          onClose={() => setImporting(false)}
+          catalog={rows}
+          available={canImport}
+        />
+      )}
     </>
   );
 }

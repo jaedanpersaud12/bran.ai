@@ -1,9 +1,9 @@
 # Progress
 
-**Stage:** 07 — Catalog import
-**Last completed:** 06 — Ask bran on `feat/06-ask-bran` (stacked on 05)
+**Stage:** 08 — Orders
+**Last completed:** 07 — Catalog import on `feat/07-catalog-import`
 **Active feature:** none
-**Next:** 07 catalog import, then 08 orders
+**Next:** 08 orders
 **Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
@@ -17,7 +17,7 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 - [x] **04** Truth pass (honest AI surfaces)
 - [x] **05** Purchase orders & supplier email
 - [x] **06** Ask bran (the real assistant)
-- [ ] **07** Catalog import (text and photo)
+- [x] **07** Catalog import (text and photo)
 - [ ] **08** Orders
 - [ ] **09** Courier adapter
 - [ ] **10** Demand signals
@@ -34,6 +34,8 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
   08–14). Rationale in `build-plan.md` → "AI does work, not decoration".
 - PRs #1 → #2 → #3 are stacked; merge in order.
 - Action for the client, not code: start Meta app review now (blocks 11 only).
+- 07 left test data in the `flvs-swim` demo workspace (6 imported variants — see its log)
+  and open review minors (2, 4–10 in its `review.md`).
 
 <!-- Anything that doesn't fit the status block above but matters across sessions:
      a rebase warning on an open branch, a decision that affects more than one
