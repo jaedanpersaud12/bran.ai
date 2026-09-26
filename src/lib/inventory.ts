@@ -2,6 +2,7 @@ import "server-only";
 
 import { sql } from "@/lib/db";
 import { scoreVariant, summarise, type RestockSummary, type Score } from "@/lib/restock";
+import { fingerprint, type ExplainLine } from "@/lib/restock-explain";
 
 /** One stocked variant, scored — what the inventory screen draws a row from. */
 export type RestockLine = {
@@ -15,11 +16,16 @@ export type RestockLine = {
   unitCostCents: number;
   priceCents: number;
   score: Score;
+  /** The sentence shown for this line: the model's when a current one is cached, else the formula's. */
+  reason: string;
+  reasonSource: "formula" | "model";
 };
 
 export type Inventory = {
   lines: RestockLine[];
   summary: RestockSummary;
+  /** Lines whose cached explanation is missing or stale, ready to hand to the model. */
+  unexplained: ExplainLine[];
 };
 
 type Row = {
@@ -36,6 +42,8 @@ type Row = {
   sold14: number;
   sold7: number;
   sold_prior7: number;
+  cached_fingerprint: string | null;
+  cached_reason: string | null;
 };
 
 /**
@@ -57,7 +65,8 @@ export async function loadInventory(workspaceId: string): Promise<Inventory> {
            coalesce(o.on_order, 0)::int as on_order,
            coalesce(s.sold14, 0)::int as sold14,
            coalesce(s.sold7, 0)::int as sold7,
-           coalesce(s.sold_prior7, 0)::int as sold_prior7
+           coalesce(s.sold_prior7, 0)::int as sold_prior7,
+           e.fingerprint as cached_fingerprint, e.reason as cached_reason
       from bran.variants v
       join bran.products p on p.id = v.product_id and p.workspace_id = ${workspaceId}
       left join (
@@ -78,13 +87,42 @@ export async function loadInventory(workspaceId: string): Promise<Inventory> {
            and po.status = 'sent'
          group by l.variant_id
       ) o on o.variant_id = v.id
+      left join bran.restock_explanations e
+        on e.variant_id = v.id and e.workspace_id = ${workspaceId}
      where v.workspace_id = ${workspaceId}
        and v.archived_at is null
      order by p.name, v.label
   `) as Row[];
 
-  const lines = rows.map(
-    (row): RestockLine => ({
+  const unexplained: ExplainLine[] = [];
+  const lines = rows.map((row): RestockLine => {
+    const score = scoreVariant({
+      onHand: row.on_hand,
+      onOrder: row.on_order,
+      leadTimeDays: row.lead_time_days,
+      minOrderQty: row.min_order_qty,
+      sold14: row.sold14,
+      sold7: row.sold7,
+      soldPrior7: row.sold_prior7,
+    });
+    const explain: ExplainLine = {
+      id: row.variant_id,
+      name: row.product,
+      variant: row.label,
+      verdict: score.verdict,
+      suggested: score.suggested,
+      onHand: row.on_hand,
+      onOrder: row.on_order,
+      leadTimeDays: row.lead_time_days,
+      pace: score.pace,
+      cover: score.cover,
+      trend: score.trend,
+    };
+    // A cached sentence only counts while it describes today's numbers.
+    const current = row.cached_reason !== null && row.cached_fingerprint === fingerprint(explain);
+    if (!current) unexplained.push(explain);
+
+    return {
       variantId: row.variant_id,
       sku: row.sku,
       name: row.product,
@@ -94,20 +132,14 @@ export async function loadInventory(workspaceId: string): Promise<Inventory> {
       leadTimeDays: row.lead_time_days,
       unitCostCents: row.unit_cost_cents,
       priceCents: row.price_cents,
-      score: scoreVariant({
-        onHand: row.on_hand,
-        onOrder: row.on_order,
-        leadTimeDays: row.lead_time_days,
-        minOrderQty: row.min_order_qty,
-        sold14: row.sold14,
-        sold7: row.sold7,
-        soldPrior7: row.sold_prior7,
-      }),
-    }),
-  );
+      score,
+      reason: current ? (row.cached_reason as string) : score.reason,
+      reasonSource: current ? "model" : "formula",
+    };
+  });
 
   // Worst cover first; lines that don't sell (no cover) go last.
   lines.sort((a, b) => (a.score.cover ?? Infinity) - (b.score.cover ?? Infinity));
 
-  return { lines, summary: summarise(lines) };
+  return { lines, summary: summarise(lines), unexplained };
 }
