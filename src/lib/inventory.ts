@@ -79,6 +79,7 @@ export async function loadInventory(workspaceId: string): Promise<Inventory> {
          group by l.variant_id
       ) o on o.variant_id = v.id
      where v.workspace_id = ${workspaceId}
+       and v.archived_at is null
      order by p.name, v.label
   `) as Row[];
 

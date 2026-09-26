@@ -1,9 +1,9 @@
 # Progress
 
-**Stage:** 02 — Catalog & stock editing
-**Last completed:** 01 — built and verified on `feat/01-restock-engine`, PR not yet opened
+**Stage:** 03 — AI layer on DeepSeek
+**Last completed:** 02 — built and verified on `feat/02-catalog-stock` (stacked on 01, PR #1 open)
 **Active feature:** none
-**Next:** 02
+**Next:** 03
 **Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
@@ -12,7 +12,7 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 ## Checklist
 
 - [x] **01** Restock engine
-- [ ] **02** Catalog & stock editing
+- [x] **02** Catalog & stock editing
 - [ ] **03** AI layer on DeepSeek
 - [ ] **04** Orders
 - [ ] **05** Courier adapter

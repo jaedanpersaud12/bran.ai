@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { ReorderPlanner } from "@/components/bran/ReorderPlanner";
 import { RestockRecommendation } from "@/components/bran/RestockRecommendation";
 import { PageHeader, Panel, StatRow } from "@/components/bran/Page";
+import { Button } from "@/components/ui/button";
 import { loadInventory } from "@/lib/inventory";
 import { formatMoneyWhole } from "@/lib/metrics";
 import { currentWorkspace } from "@/lib/workspace";
@@ -40,7 +42,11 @@ export default async function InventoryPage() {
 
   return (
     <div className="w-full">
-      <PageHeader title="Inventory" blurb={BLURB} />
+      <PageHeader title="Inventory" blurb={BLURB}>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/inventory/catalog">Manage catalog</Link>
+        </Button>
+      </PageHeader>
 
       <StatRow
         stats={[
@@ -80,7 +86,11 @@ export default async function InventoryPage() {
           <ReorderPlanner items={lines} />
         ) : (
           <p className="text-[13px] text-muted-foreground">
-            No products yet. Once there are variants with stock and sales, restock scores them here.
+            No products yet.{" "}
+            <Link href="/inventory/catalog" className="text-foreground underline underline-offset-4">
+              Add what you sell
+            </Link>
+            ; once it has stock and sales, restock scores it here.
           </p>
         )}
       </Panel>
