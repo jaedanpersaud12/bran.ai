@@ -25,7 +25,7 @@ function useSequence(steps: number[]) {
   return stage;
 }
 
-type Row = {
+export type TraceRow = {
   primary: string;
   secondary?: string;
   mono?: boolean;
@@ -34,47 +34,17 @@ type Row = {
   href?: string;
 };
 
-const VARIANTS: Record<
-  string,
-  { active: string; done: string; rows: Row[]; query?: string }
-> = {
-  Steps: {
-    active: "Thinking",
-    done: "Thought for 4 seconds",
-    rows: [
-      { primary: "Reading the last 90 days of sales" },
-      { primary: "Checking open purchase orders" },
-      { primary: "Weighing cover against the calendar", secondary: "7 lines" },
-      { primary: "Drafting the reorder" },
-    ],
-  },
-  Reasoning: {
-    active: "Thinking",
-    done: "Thought for 4 seconds",
-    rows: [
-      { primary: "Carnival demand lands hardest on the triangle top — black leads, small first." },
-      { primary: "I should check cone inventory before promoting a waffle-bowl special." },
-    ],
-  },
-  Search: {
-    active: "Searching the web",
-    done: "Searched the web",
-    query: "tobago triangle top restock",
-    rows: [
-      { primary: "Joy Cone", secondary: "joycone.com", href: "https://joycone.com/fs_products/waffle-cones/" },
-      { primary: "WebstaurantStore", secondary: "webstaurantstore.com", href: "https://www.webstaurantstore.com/ice-cream-shop-supplies.html" },
-      { primary: "The Konery", secondary: "thekonery.com", href: "https://www.thekonery.com/" },
-    ],
-  },
-  Coding: {
-    active: "Running tools",
-    done: "Ran 3 tools",
-    rows: [
-      { primary: "Read", secondary: "stock.ts", mono: true },
-      { primary: "Edit", secondary: "ReorderPlan.tsx", mono: true, add: 74, del: 41 },
-      { primary: "Run", secondary: "npm run freeze", mono: true },
-    ],
-  },
+/**
+ * What the trace shows. Passed in rather than chosen from built-in samples:
+ * a trace is a claim about what ran, so it has to come from the caller that
+ * knows — never from defaults baked into the component.
+ */
+export type Trace = {
+  kind: "Steps" | "Reasoning" | "Search" | "Coding";
+  active: string;
+  done: string;
+  rows: TraceRow[];
+  query?: string;
 };
 
 function Dot({ tone }: { tone: string }) {
@@ -90,11 +60,12 @@ function Dot({ tone }: { tone: string }) {
 
 const TONES = ["bg-accent", "bg-orange", "bg-green"];
 
-export default function ThinkingState({ variant = "Steps", onSettled }: { variant?: string; onSettled?: () => void }) {
+export default function ThinkingState({ trace, onSettled }: { trace: Trace; onSettled?: () => void }) {
+  const variant = trace.kind;
   const stage = useSequence(STAGES);
   const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const v = VARIANTS[variant] ?? VARIANTS.Steps;
+  const v = trace;
   const autoExpanded = stage >= 1 && stage < 4;
   const expanded = manualExpanded ?? autoExpanded;
   const working = stage < 3;

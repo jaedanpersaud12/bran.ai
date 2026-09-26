@@ -22,6 +22,7 @@ export default function StorefrontsPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="These storefronts are examples. Real storefronts come with onboarding."
         title="Storefronts"
         blurb="One workspace can carry more than one label. Each gets its own storefront, its own handle and its own numbers, drawing on shared inventory underneath."
       >

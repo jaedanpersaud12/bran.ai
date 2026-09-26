@@ -38,6 +38,7 @@ export default async function AnalyticsPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="Revenue and traffic figures are examples. Best sellers is live, from restock."
         title="Analytics"
         blurb={`Everything the workspace recorded between ${formatRange(start, end)}.`}
       />

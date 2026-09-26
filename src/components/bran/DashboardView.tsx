@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef } from "react";
-import { ChartPie, Wallet } from "lucide-react";
+import Link from "next/link";
+import { Wallet } from "lucide-react";
+import { PackageIcon } from "@/components/icons/package";
+import { StatusPill } from "@/components/ui/status-pill";
 import { ArrowRightIcon } from "@/components/icons/arrow-right";
 import { LayersIcon } from "@/components/icons/layers";
-import { MessageCircleIcon } from "@/components/icons/message-circle";
 import type { AnimatedIcon, AnimatedIconHandle } from "@/components/icons/types";
 import MonoAreaChart from "@/components/bran/MonoAreaChart";
 import { RevenueDial } from "@/components/bran/RevenueDial";
@@ -16,7 +18,6 @@ import {
   BUDGET,
   CUSTOMERS,
   DATE_LOCALE,
-  INSIGHT,
   KPIS,
   REVENUE_SPLIT,
   TAX_PAYMENT,
@@ -40,11 +41,14 @@ export function DashboardView({
   name,
   series,
   range,
+  restock,
 }: {
   greeting: string;
   name: string | null;
   series: RevenuePoint[];
   range: string;
+  /** The one live panel: computed from the workspace's stock. Null when signed out. */
+  restock: { flagged: number; tracked: number; atRisk: string } | null;
 }) {
   const growth = mrrGrowth();
   const paidShare = CUSTOMERS.parts[0].count / CUSTOMERS.total;
@@ -59,6 +63,16 @@ export function DashboardView({
         </h1>
         <Toolbar range={range} />
       </header>
+
+      {/* Said once, at the top: everything but the restock panel is placeholder
+          until orders (build-plan 08) and billing (13) exist. */}
+      <p className="-mt-2 mb-4 flex flex-wrap items-center gap-2 text-[12.5px] text-muted-foreground">
+        <StatusPill tone="neutral" className="px-1.5 py-0 text-[10.5px]">
+          Sample data
+        </StatusPill>
+        Revenue, customers and budget are sample figures until orders and billing are
+        connected. Restock is live.
+      </p>
 
       {/*
        * Hairlines rather than cards. Eleven separate panels on one screen is
@@ -110,18 +124,37 @@ export function DashboardView({
             <div className="border-b border-border py-6 md:border-r md:border-b-0 md:pr-6">
               <div className="flex items-center justify-between gap-4">
                 <h2 className="flex items-center gap-2 text-[13px] font-medium">
-                  <ChartPie className="size-4 text-muted-foreground" strokeWidth={1.5} />
-                  AI Insights
+                  Restock
+                  <StatusPill tone="success" className="px-1.5 py-0 text-[10.5px]">
+                    Live
+                  </StatusPill>
                 </h2>
-                <GhostButton icon={MessageCircleIcon}>Ask AI</GhostButton>
+                <GhostButton icon={PackageIcon} href="/inventory">
+                  Open restock
+                </GhostButton>
               </div>
 
-              {/* Set light and large: it is a sentence to read, not a figure to
-                  scan, and the only part worth lifting is the number. */}
+              {/* Computed, not generated: restock's own totals, in a sentence. */}
               <p className="mt-5 text-[24px] leading-[1.3] font-light tracking-[-0.01em] text-balance text-muted-foreground">
-                {INSIGHT.before}
-                <strong className="font-semibold text-foreground">{INSIGHT.figure}</strong>
-                {INSIGHT.after}
+                {restock === null ? (
+                  "Sign in to see what needs reordering."
+                ) : restock.flagged === 0 ? (
+                  <>
+                    Nothing needs reordering today across{" "}
+                    <strong className="font-semibold text-foreground">
+                      {restock.tracked} lines
+                    </strong>
+                    .
+                  </>
+                ) : (
+                  <>
+                    <strong className="font-semibold text-foreground">
+                      {restock.flagged} of {restock.tracked} lines
+                    </strong>{" "}
+                    need reordering, with {restock.atRisk} of sales at risk before new stock
+                    could land.
+                  </>
+                )}
               </p>
             </div>
 
@@ -256,18 +289,36 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
  * hold the ref that drives it: the glyph is 14px inside a button three times
  * that, and the animation belongs to pointing at the action.
  */
-function GhostButton({ icon: Icon, children }: { icon: AnimatedIcon; children: React.ReactNode }) {
+function GhostButton({
+  icon: Icon,
+  href,
+  children,
+}: {
+  icon: AnimatedIcon;
+  /** A link when it goes somewhere; a button otherwise. */
+  href?: string;
+  children: React.ReactNode;
+}) {
   const handle = useRef<AnimatedIconHandle>(null);
-
-  return (
-    <button
-      type="button"
-      onMouseEnter={() => handle.current?.startAnimation()}
-      onMouseLeave={() => handle.current?.stopAnimation()}
-      className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium transition-[background-color,scale] duration-150 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none active:scale-[0.96]"
-    >
+  const props = {
+    onMouseEnter: () => handle.current?.startAnimation(),
+    onMouseLeave: () => handle.current?.stopAnimation(),
+    className:
+      "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium transition-[background-color,scale] duration-150 hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none active:scale-[0.96]",
+  };
+  const content = (
+    <>
       <Icon ref={handle} size={14} className="shrink-0 text-muted-foreground" />
       {children}
+    </>
+  );
+  return href ? (
+    <Link href={href} {...props}>
+      {content}
+    </Link>
+  ) : (
+    <button type="button" {...props}>
+      {content}
     </button>
   );
 }

@@ -81,13 +81,13 @@ export default async function InventoryPage() {
         ]}
       />
 
-      <Panel title="The model's call" hint="What it would do today, and what it would do instead.">
+      <Panel title="Restock's call" hint="What it would order today, and the alternatives.">
         <RestockRecommendation lines={lines} summary={summary} />
       </Panel>
 
       <Panel
         title="Plan the reorder"
-        hint="Filled in with what the model would order. Change anything you disagree with."
+        hint="Filled in with what restock would order. Change anything you disagree with."
       >
         {lines.length > 0 ? (
           <ReorderPlanner items={lines} />

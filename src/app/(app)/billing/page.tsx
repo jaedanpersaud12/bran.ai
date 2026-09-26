@@ -19,6 +19,7 @@ export default function BillingPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="Plans, usage and invoices here are examples. Billing isn't connected yet."
         title="Billing"
         blurb="What this workspace is on, what it has used, and what the other tiers carry."
       >

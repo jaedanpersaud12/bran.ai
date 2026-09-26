@@ -32,13 +32,13 @@ export default function InventoryLoading() {
         ))}
       </section>
 
-      <Panel title="The model's call" hint="What it would do today, and what it would do instead.">
+      <Panel title="Restock's call" hint="What it would order today, and the alternatives.">
         <div className="h-[150px] w-full max-w-95 animate-pulse rounded-card bg-foreground/10" />
       </Panel>
 
       <Panel
         title="Plan the reorder"
-        hint="Filled in with what the model would order. Change anything you disagree with."
+        hint="Filled in with what restock would order. Change anything you disagree with."
       >
         <div className="space-y-5">
           {["w-4/5", "w-3/5", "w-2/3", "w-1/2", "w-3/5", "w-2/5"].map((width, index) => (

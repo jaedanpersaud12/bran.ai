@@ -29,6 +29,7 @@ export default function CampaignsPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="These campaigns and their results are examples."
         title="Campaigns"
         blurb="Drops and promotions, and the orders each one is responsible for. Attribution follows the order back to the post or ad the customer arrived from."
       >

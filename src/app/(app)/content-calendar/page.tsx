@@ -28,6 +28,7 @@ export default function ContentCalendarPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="These posts are examples, including the ones marked as drafted by the assistant. Scheduling and AI captions come later."
         title="Content Calendar"
         blurb="What is going out this week, across every channel. The assistant drafts from the pieces you are restocking, so a post and the stock behind it are never out of step."
       >

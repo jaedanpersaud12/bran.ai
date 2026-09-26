@@ -20,6 +20,7 @@ export default function IntegrationsPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="Connection status and activity here are examples. Nothing is connected yet."
         title="Integrations"
         blurb="What bran is plugged into. Couriers collect from the orders queue, payment providers settle in TTD, and channels feed both the calendar and the assistant."
       />

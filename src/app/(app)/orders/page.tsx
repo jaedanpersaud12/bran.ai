@@ -48,6 +48,7 @@ export default function OrdersPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="These orders are examples. Real orders arrive with the Orders feature."
         title="Orders"
         blurb="One queue, whatever channel the order came in through. Paid orders are handed to a courier automatically on the next run unless you hold them."
       >
