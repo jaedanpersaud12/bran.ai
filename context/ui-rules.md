@@ -126,6 +126,38 @@ and `destructive` for states (saved, failed) and `positive` / `negative` for dir
 
 ---
 
+## How AI Is Presented
+
+Set 2026-09-26, after a review found the app showing more AI than it had. The rule under
+all of these: **an owner must always be able to tell what a language model wrote from what
+bran computed, and nothing AI-shaped may be fake.**
+
+- **Words for the two things.** The restock formula is "restock" ("Restock's call",
+  "Restock said 59"). "AI" means a language model wrote it. Never call the formula "the
+  model" or "AI".
+- **Mark model-written text where it sits**, not in a banner: the `Sparkles` glyph
+  (`size-3`, `strokeWidth={1.5}`, `text-subtle-foreground`) after the text, with sr-only
+  "Explained by AI" / "Written by AI" and a `title` saying what the model did and did not
+  decide. Everything else on the screen is assumed computed.
+- **No fake AI.** No invented AI metrics, scripted conversations presented as live, or
+  "Ask AI" buttons that do nothing. A preview of a feature that isn't built yet is labelled
+  "Sample" in the surface itself (a `StatusPill tone="neutral"`), and its inputs are
+  disabled with a line saying why.
+- **AI proposes; the owner approves.** Anything an AI step would change is a draft or an
+  approval (AI Elements `confirmation`), never done silently. The confirmation names
+  exactly what will happen ("Create PO-0004 with 5 lines, TT$22,082").
+- **Show the work, briefly.** Agent tool calls render with AI Elements `tool` (what it
+  looked up, what came back), collapsed by default. No invented "thinking" steps — only
+  what actually ran.
+- **AI off is a normal state.** Without a key, or when a call fails, the surface shows the
+  computed version with no error styling; an assistant says "AI is off for this workspace"
+  instead of an input that goes nowhere.
+- **Chat and agent UI comes from AI Elements** (`npx ai-elements@latest add <component>`),
+  restyled onto bran's tokens on install. The hand-rolled demo primitives in
+  `src/components/primitives/` are retired as each surface becomes real.
+
+---
+
 ## Do Nots
 
 - Never use Tailwind's built-in color classes (`bg-purple-500`, `text-gray-600`) or a raw

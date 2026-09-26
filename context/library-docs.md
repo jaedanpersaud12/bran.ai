@@ -58,6 +58,13 @@ Verified against the bundled docs in `node_modules/ai/docs` and
 - **The DeepSeek provider appends the JSON schema to the messages** in structured-output
   mode — a stand-in server that parses the prompt must look for its own markers, not the
   first `[`.
+- **Images:** `deepseek-v4-flash` is text-only. The provider docs route images through
+  `deepseek-v4-flash-vision-exp` (experimental) with file parts and
+  `providerOptions.deepseek.imageDetail`. Treat it as unproven until 07 tests it.
+- **Agents:** `ToolLoopAgent` and per-tool `needsApproval` are in the bundled docs
+  (`node_modules/ai/docs/03-agents`). Read them when 06 starts; nothing here yet.
+- **AI Elements** is not installed yet. Its usage pattern gets written here when 04–06
+  first install components, verified against what's installed.
 - **Testing:** pure modules take `model: LanguageModel` as an argument; tests pass
   `new MockLanguageModelV4({ doGenerate })` from `ai/test` and run under `node --test`.
 - **Model output is never trusted to decide.** It explains numbers the app computed;
