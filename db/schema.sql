@@ -128,3 +128,7 @@ create table if not exists bran.purchase_order_lines (
 
 create index if not exists purchase_order_lines_variant_idx
   on bran.purchase_order_lines (variant_id);
+
+-- Archiving takes a variant out of restock and the default catalogue view
+-- without losing its sales or purchase-order history. Nothing is deleted.
+alter table bran.variants add column if not exists archived_at timestamptz;
