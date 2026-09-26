@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, Minus, Plus, Undo2 } from "lucide-react";
+import { Check, Minus, Plus, Sparkles, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -162,7 +162,20 @@ export function ReorderPlanner({ items }: { items: RestockLine[] }) {
                     <Badge variant={verdict.variant} className="mb-1">
                       {verdict.label}
                     </Badge>
-                    <span className="block">{item.score.reason}</span>
+                    <span className="block">
+                      {item.reason}
+                      {/* Said, not just styled: the reader should know which
+                          sentences a model wrote. */}
+                      {item.reasonSource === "model" ? (
+                        <span
+                          title="Written by the model from the numbers in this row. The verdict and quantity are the formula's."
+                          className="ml-1.5 inline-flex translate-y-[1px] items-center gap-0.5 text-[11px] text-subtle-foreground"
+                        >
+                          <Sparkles aria-hidden className="size-3" strokeWidth={1.5} />
+                          <span className="sr-only">Explained by the model</span>
+                        </span>
+                      ) : null}
+                    </span>
                   </TableCell>
 
                   <TableCell>

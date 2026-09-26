@@ -132,3 +132,35 @@ create index if not exists purchase_order_lines_variant_idx
 -- Archiving takes a variant out of restock and the default catalogue view
 -- without losing its sales or purchase-order history. Nothing is deleted.
 alter table bran.variants add column if not exists archived_at timestamptz;
+
+-- -------------------------------------------------------------------- AI --
+
+-- One row per model call, whatever it was for. No prompt or response
+-- bodies: this is for cost, latency and failure rates, per workspace.
+create table if not exists bran.ai_runs (
+  id             bigint generated always as identity primary key,
+  workspace_id   uuid references bran.workspaces (id) on delete cascade,
+  feature        text not null,
+  model          text not null,
+  ok             boolean not null,
+  error          text,
+  input_tokens   integer,
+  output_tokens  integer,
+  duration_ms    integer not null,
+  created_at     timestamptz not null default now()
+);
+
+create index if not exists ai_runs_workspace_idx on bran.ai_runs (workspace_id, created_at);
+
+-- The model's sentence for a restock line, valid while the line's numbers
+-- match `fingerprint`. A stock change, a new sale or a new suggestion changes
+-- the fingerprint, and the next load explains the line afresh.
+create table if not exists bran.restock_explanations (
+  workspace_id  uuid not null references bran.workspaces (id) on delete cascade,
+  variant_id    uuid not null references bran.variants (id) on delete cascade,
+  fingerprint   text not null,
+  reason        text not null,
+  model         text not null,
+  created_at    timestamptz not null default now(),
+  primary key (workspace_id, variant_id)
+);

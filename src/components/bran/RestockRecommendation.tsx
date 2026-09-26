@@ -47,7 +47,7 @@ export function RestockRecommendation({
           Reorder {reorders.length} {reorders.length === 1 ? "line" : "lines"},{" "}
           <ValuePill tone="green">{summary.units} units</ValuePill> for{" "}
           {formatMoneyWhole(summary.costCents / 100)}. Most urgent: <EntityChip name={top.name} />{" "}
-          {top.variant.toLowerCase()} — {lowerFirst(top.score.reason)}
+          {top.variant.toLowerCase()} — {lowerFirst(top.reason)}
         </>
       ),
       short: `Reorder all ${reorders.length} · ${summary.units} units`,

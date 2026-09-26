@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { ReorderPlanner } from "@/components/bran/ReorderPlanner";
 import { RestockRecommendation } from "@/components/bran/RestockRecommendation";
 import { PageHeader, Panel, StatRow } from "@/components/bran/Page";
 import { Button } from "@/components/ui/button";
 import { loadInventory } from "@/lib/inventory";
+import { explainMissing } from "@/lib/restock-ai";
 import { formatMoneyWhole } from "@/lib/metrics";
 import { currentWorkspace } from "@/lib/workspace";
 
@@ -38,7 +40,12 @@ export default async function InventoryPage() {
     );
   }
 
-  const { lines, summary } = await loadInventory(current.workspace.id);
+  const workspaceId = current.workspace.id;
+  const { lines, summary, unexplained } = await loadInventory(workspaceId);
+
+  // The model's sentences never hold up the page: this load shows the
+  // formula's, and whatever the model writes is there on the next one.
+  if (unexplained.length > 0) after(() => explainMissing(workspaceId, unexplained));
 
   return (
     <div className="w-full">

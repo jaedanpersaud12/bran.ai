@@ -1,0 +1,66 @@
+import "server-only";
+
+import { sql } from "@/lib/db";
+import { aiConfigured, modelId } from "@/lib/ai/model";
+
+/** Long enough for a batched explanation; short enough that a stuck call dies. */
+const TIMEOUT_MS = 15_000;
+
+export type Usage = { inputTokens?: number; outputTokens?: number };
+
+/**
+ * Every AI call in bran goes through here.
+ *
+ * It never throws: a model call is always an enhancement on something the app
+ * can already do without it, so the caller gets `null` and carries on with
+ * its fallback. It always logs one `bran.ai_runs` row — feature, model,
+ * tokens, time, outcome, never the prompt or the answer — so what the model
+ * costs per workspace is a query, not a guess.
+ */
+export async function runAI<T>({
+  feature,
+  workspaceId,
+  call,
+}: {
+  /** Short, stable name for the ai_runs log: `restock-explain`, later `dm-reply`. */
+  feature: string;
+  workspaceId: string | null;
+  call: (signal: AbortSignal) => Promise<{ value: T; usage?: Usage }>;
+}): Promise<T | null> {
+  if (!aiConfigured) return null;
+
+  const started = Date.now();
+  try {
+    const { value, usage } = await call(AbortSignal.timeout(TIMEOUT_MS));
+    await log({ feature, workspaceId, ok: true, usage, ms: Date.now() - started });
+    return value;
+  } catch (error) {
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    console.error(`AI call "${feature}" failed`, message);
+    await log({ feature, workspaceId, ok: false, error: message, ms: Date.now() - started });
+    return null;
+  }
+}
+
+async function log(run: {
+  feature: string;
+  workspaceId: string | null;
+  ok: boolean;
+  error?: string;
+  usage?: Usage;
+  ms: number;
+}): Promise<void> {
+  if (!sql) return;
+  try {
+    await sql`
+      insert into bran.ai_runs
+        (workspace_id, feature, model, ok, error, input_tokens, output_tokens, duration_ms)
+      values (${run.workspaceId}, ${run.feature}, ${modelId}, ${run.ok},
+              ${run.error?.slice(0, 500) ?? null}, ${run.usage?.inputTokens ?? null},
+              ${run.usage?.outputTokens ?? null}, ${run.ms})
+    `;
+  } catch (error) {
+    // Losing a log row must never cost the caller its answer.
+    console.error("ai_runs insert failed", error);
+  }
+}
