@@ -20,7 +20,7 @@ the blueprint wants plain-language explanations "so owners trust the call".
 - [x] `/inventory` renders without waiting on the model: uncached lines show the formula reason and are explained after the response (`after()`), and the next load shows the model's text
 - [x] Explanations are cached in `bran.restock_explanations` keyed by a fingerprint of the line's numbers; changing a line's stock invalidates only that line
 - [x] Model-written reasons are visibly marked as such in the planner
-- [ ] A live DeepSeek call returns explanations for the demo workspace (needs a key)
+- [x] A live DeepSeek call returns explanations for the demo workspace (needs a key)
 - [x] `pnpm check` and `pnpm test` pass
 
 ## Out of scope

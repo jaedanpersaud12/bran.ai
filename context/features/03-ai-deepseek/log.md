@@ -38,7 +38,13 @@
   *(browser + SQL + stand-in log)*
 - **Model text is marked** — a `Sparkles` glyph after the sentence with sr-only "Explained
   by the model" and a title saying the verdict and quantity are the formula's. *(browser)*
-- **Live DeepSeek call** — not verified, because there is no `DEEPSEEK_API_KEY` yet. Add
-  one to `.env.local`, load `/inventory` twice, and check `bran.ai_runs` for an `ok` row.
+- **Live DeepSeek call** — developer added `DEEPSEEK_API_KEY` (no base URL override). Load
+  1 showed formula text; `bran.ai_runs` then held one row: `deepseek-v4-flash`, ok,
+  1,828 in / 668 out tokens, 3,212 ms; 12 rows cached (all 12 passed the guardrails). Load
+  2 showed DeepSeek's sentences on all 12 lines, with verdicts and quantities unchanged
+  (59, 76, 51, 61, 47), and the recommendation card used the top line's sentence. Every
+  number in the text matches its row. One soft miss: the rash guard (Hold) ends "Keep
+  watching", blurring Hold and Watch — acceptable, worth a prompt line if it recurs.
+  *(browser + SQL)*
 - **Clean-up** — stand-in stopped, temporary env lines removed, stand-in explanations and
   test runs deleted, Flame · S restored to 19. *(SQL)*

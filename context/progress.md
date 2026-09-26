@@ -1,10 +1,10 @@
 # Progress
 
-**Stage:** 03 — AI layer on DeepSeek (built; live call pending a key)
-**Last completed:** 02 — built and verified on `feat/02-catalog-stock` (stacked on 01, PR #1 open)
-**Active feature:** 03 (`feat/03-ai-deepseek`, stacked on 02)
+**Stage:** 04 — Orders
+**Last completed:** 03 — verified live on `feat/03-ai-deepseek` (PRs #1 → #2 → 03 stacked)
+**Active feature:** none
 **Next:** 04
-**Blocker:** 03's live-call check needs `DEEPSEEK_API_KEY` in `.env.local`
+**Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
 `log.md`, `review.md`. This file is the status block and the checklist, nothing else.
@@ -13,7 +13,7 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 
 - [x] **01** Restock engine
 - [x] **02** Catalog & stock editing
-- [ ] **03** AI layer on DeepSeek
+- [x] **03** AI layer on DeepSeek
 - [ ] **04** Orders
 - [ ] **05** Courier adapter
 - [ ] **06** Demand signals
