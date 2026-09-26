@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { Check, Minus, Plus, Undo2 } from "lucide-react";
 import { AiMark, RESTOCK_AI_TITLE } from "@/components/bran/AiMark";
 import { Badge } from "@/components/ui/badge";
@@ -269,7 +270,13 @@ export function ReorderPlanner({ items }: { items: RestockLine[] }) {
 
       {drafted ? (
         <p className="mt-2 text-center text-[12.5px] text-muted-foreground">
-          Saved as a draft for you to check. Nothing has been sent to a supplier.
+          Saved as a draft for you to check. Nothing has been sent to a supplier.{" "}
+          <Link
+            href={`/inventory/purchase-orders?open=${drafted}`}
+            className="text-foreground underline underline-offset-4"
+          >
+            Open {drafted}
+          </Link>
         </p>
       ) : null}
       {error ? (

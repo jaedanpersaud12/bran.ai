@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import RecommendationCard, { type RecommendationOption } from "@/components/primitives/RecommendationCard";
 import { EntityChip } from "@/components/atoms/EntityChip";
 import { ValuePill } from "@/components/atoms/ValuePill";
@@ -17,7 +19,7 @@ const THIS_WEEK = 7;
  *
  * Up to three options: order everything restock flagged, order only what runs
  * out this week, or order nothing and accept the projected loss. Accepting an
- * order option drafts the purchase order with the model's own quantities —
+ * order option drafts the purchase order with restock's own quantities —
  * the one-tap path. The planner is for disagreeing with it.
  */
 export function RestockRecommendation({
@@ -27,6 +29,7 @@ export function RestockRecommendation({
   lines: RestockLine[];
   summary: RestockSummary;
 }) {
+  const [drafted, setDrafted] = useState<string | null>(null);
   const reorders = lines.filter((line) => line.score.verdict === "reorder");
   const urgent = reorders.filter((line) => (line.score.cover ?? 0) < THIS_WEEK);
   const top = reorders[0];
@@ -97,15 +100,30 @@ export function RestockRecommendation({
     const result = await draftPurchaseOrder(
       chosen.map((line) => ({ variantId: line.variantId, quantity: line.score.suggested })),
     );
-    return result.ok ? `Drafted ${result.reference}` : null;
+    if (!result.ok) return null;
+    setDrafted(result.reference);
+    return `Drafted ${result.reference}`;
   };
 
   return (
-    <RecommendationCard
-      labels={{ title: "Draft this reorder?" }}
-      options={options}
-      onAccept={accept}
-    />
+    <div>
+      <RecommendationCard
+        labels={{ title: "Draft this reorder?" }}
+        options={options}
+        onAccept={accept}
+      />
+      {drafted ? (
+        <p className="mt-2 text-[12.5px] text-muted-foreground">
+          Saved as a draft. Nothing has been sent.{" "}
+          <Link
+            href={`/inventory/purchase-orders?open=${drafted}`}
+            className="text-foreground underline underline-offset-4"
+          >
+            Open {drafted}
+          </Link>
+        </p>
+      ) : null}
+    </div>
   );
 }
 

@@ -39,10 +39,26 @@ test("stock on order counts toward cover and comes off the suggestion", () => {
   assert.equal(short.suggested, 62);
   assert.match(short.reason, /20 already on order/);
 
+  // 40 days of cover once 60 land: within what restock would order, so it's
+  // the plan working, not overstock.
   const covered = scoreVariant({ ...steady, onOrder: 60 });
-  assert.equal(covered.verdict, "hold");
+  assert.equal(covered.verdict, "watch");
   assert.equal(covered.suggested, 0);
-  assert.match(covered.reason, /60 on order/);
+  assert.match(covered.reason, /60 on order covers the 21-day wait/);
+});
+
+test("following restock's own suggestion never earns a 'trim that order' hold", () => {
+  const first = scoreVariant(steady);
+  const after = scoreVariant({ ...steady, onOrder: first.suggested });
+  assert.equal(after.verdict, "watch");
+  assert.doesNotMatch(after.reason, /trim/i);
+});
+
+test("more on order than restock would ever suggest is flagged to trim", () => {
+  // 20 + 200 = 110 days of cover, past 21 + 30 + 7.
+  const over = scoreVariant({ ...steady, onOrder: 200 });
+  assert.equal(over.verdict, "hold");
+  assert.match(over.reason, /200 on order takes cover to 90\+ days. Consider trimming/);
 });
 
 test("a suggestion never goes below the supplier's minimum", () => {

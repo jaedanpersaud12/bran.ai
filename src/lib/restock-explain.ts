@@ -30,6 +30,12 @@ export type ExplainLine = {
   trend: number | null;
 };
 
+/**
+ * Bump when the instructions or the prompt's fields change: it's part of every
+ * fingerprint, so sentences written under the old prompt are re-explained.
+ */
+export const PROMPT_VERSION = "p2";
+
 /** One call explains at most this many lines; the rest wait for the next load. */
 export const MAX_LINES_PER_CALL = 40;
 const MAX_REASON = 240;
@@ -42,6 +48,7 @@ const MAX_REASON = 240;
  */
 export function fingerprint(line: ExplainLine): string {
   return [
+    PROMPT_VERSION,
     line.verdict,
     line.suggested,
     line.onHand,
@@ -70,7 +77,9 @@ export function buildPrompt(lines: ExplainLine[]): string {
     on_order: line.onOrder,
     supplier_lead_time_days: line.leadTimeDays,
     sold_per_day: Number(line.pace.toFixed(1)),
-    days_of_cover: line.cover === null ? null : Math.round(line.cover),
+    // Named for what it holds: cover already counts the units on order, and a
+    // bare "days_of_cover" read as "plus what's on order" in live output.
+    days_of_cover_including_on_order: line.cover === null ? null : Math.round(line.cover),
     week_on_week: trendWord(line.trend),
   }));
   return `Rules the formula follows: reorder when a line sells at least 0.5 a day and its cover is under the lead time plus 7 days, ordering enough for the lead time plus 30 days; hold when cover is over 35 days, sales are falling, or nothing sold in 14 days; otherwise watch.
