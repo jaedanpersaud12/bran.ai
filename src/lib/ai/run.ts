@@ -32,17 +32,21 @@ export async function runAI<T>({
   const started = Date.now();
   try {
     const { value, usage } = await call(AbortSignal.timeout(TIMEOUT_MS));
-    await log({ feature, workspaceId, ok: true, usage, ms: Date.now() - started });
+    await logRun({ feature, workspaceId, ok: true, usage, ms: Date.now() - started });
     return value;
   } catch (error) {
     const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     console.error(`AI call "${feature}" failed`, message);
-    await log({ feature, workspaceId, ok: false, error: message, ms: Date.now() - started });
+    await logRun({ feature, workspaceId, ok: false, error: message, ms: Date.now() - started });
     return null;
   }
 }
 
-async function log(run: {
+/**
+ * One `bran.ai_runs` row. `runAI` calls it for request/response calls; a
+ * streamed agent logs from its `onEnd` with the run's total usage.
+ */
+export async function logRun(run: {
   feature: string;
   workspaceId: string | null;
   ok: boolean;

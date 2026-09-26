@@ -6,6 +6,14 @@ import { runAI } from "@/lib/ai/run";
 import { explainLines, fingerprint, type ExplainLine } from "@/lib/restock-explain";
 
 /**
+ * Runs in progress, per workspace. Several page loads at once (tabs, the
+ * dashboard and inventory together) each schedule an explanation; without
+ * this they each paid for the same call — six identical runs in two seconds
+ * in the ai_runs log. Per server instance, which is where the burst happens.
+ */
+const inFlight = new Map<string, Promise<void>>();
+
+/**
  * Explains the lines the cache didn't cover, and stores what passes.
  *
  * Called from `after()` on the inventory page, so nobody waits on it: this
@@ -14,6 +22,15 @@ import { explainLines, fingerprint, type ExplainLine } from "@/lib/restock-expla
  */
 export async function explainMissing(workspaceId: string, lines: ExplainLine[]): Promise<void> {
   if (!aiConfigured || !sql || lines.length === 0) return;
+  const running = inFlight.get(workspaceId);
+  if (running) return running;
+  const run = explain(workspaceId, lines).finally(() => inFlight.delete(workspaceId));
+  inFlight.set(workspaceId, run);
+  return run;
+}
+
+async function explain(workspaceId: string, lines: ExplainLine[]): Promise<void> {
+  if (!sql) return;
 
   const result = await runAI({
     feature: "restock-explain",

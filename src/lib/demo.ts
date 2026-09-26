@@ -13,7 +13,6 @@
  * brand the product was designed against.
  */
 
-import type { Trace } from "@/components/primitives/ThinkingState";
 import { formatMoney, formatMoneyWhole, type Delta } from "@/lib/metrics";
 
 export { formatMoney, formatMoneyWhole };
@@ -230,64 +229,3 @@ export const USAGE = {
   renewsOn: "October 1, 2026",
 };
 
-/* ------------------------------------------------- Assistant conversations */
-
-/**
- * Three threads, each showing a different shape of the assistant's work.
- *
- * They are separate conversations rather than one long one on purpose: the
- * assistant does three quite different jobs, and a single transcript would
- * only ever demonstrate whichever one happened last.
- */
-export type Conversation = {
-  key: string;
-  /** The tab label. */
-  name: string;
-  /** Who or what the thread is with. */
-  who: string;
-  /** What the person opened with. */
-  opener: string;
-  /** How the reply reads, one word per token so it can stream. */
-  answer: string;
-  /** The steps shown behind "Thought for Ns" — what the finished feature would run. */
-  trace: Trace;
-};
-
-export const CONVERSATIONS: Conversation[] = [
-  {
-    key: "dm",
-    name: "Aaliyah · DM",
-    who: "Instagram DM · Chaguanas",
-    opener: "hey doux doux, yuh have de black triangle top in a small still?",
-    answer:
-      "Small in black — we down to 4, so I hold one for you for the next 2 hours. The medium finish since Friday but 60 more coming Thursday. With Zoom TT to Chaguanas that is TT$330 all in.",
-    trace: {
-      kind: "Steps",
-      active: "Working",
-      done: "Took 3 steps",
-      rows: [
-        { primary: "Read her message", secondary: "Black · S, availability" },
-        { primary: "Looked up stock", secondary: "FLV-TRI-BLK-S" },
-        { primary: "Priced delivery", secondary: "Zoom TT · Chaguanas" },
-      ],
-    },
-  },
-  {
-    key: "dispatch",
-    name: "Dispatch",
-    who: "You · Orders",
-    opener: "is today's run ready to go?",
-    answer:
-      "Six orders are packed and paid, waiting on Zoom TT. Three are still unpaid and I am holding their stock for another hour. One Tobago order needs Moving Solutions instead — they only collect on Tuesdays.",
-    trace: {
-      kind: "Steps",
-      active: "Working",
-      done: "Took 3 steps",
-      rows: [
-        { primary: "Read today's orders", secondary: "10 open" },
-        { primary: "Checked payments" },
-        { primary: "Matched couriers to areas" },
-      ],
-    },
-  },
-];
