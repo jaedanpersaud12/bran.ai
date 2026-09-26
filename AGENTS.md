@@ -21,3 +21,15 @@ bearing:
   applies it; do not build keys by hand.
 
 Accounts are deliberately shared: one FLVS login works in both products.
+
+# Built on groundwork
+
+This repo uses groundwork's agent kit and token contract (gw.jaedan.me), without
+InsForge. Before working on a feature, read `context/`: `code-standards.md`,
+`ui-rules.md`, `library-docs.md`, `ui-registry.md` and `progress.md`. The skills
+live in `.claude/skills/`: every feature opens with `/feature start NN` and closes
+with `/feature finish`, with `/architect` and `/review` in between.
+
+Colours come from the token contract (`@ja3dan/tokens`) plus bran's own tokens,
+which are listed in `context/ui-rules.md`. `@ja3dan/no-raw-colors` fails anything
+else, and `pnpm check` runs types and lint together.

@@ -8,7 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { STOCK, formatMoneyWhole } from "@/lib/demo";
+import { loadInventory } from "@/lib/inventory";
+import { currentWorkspace } from "@/lib/workspace";
 import { formatRange, reportingWindow, revenueSeries } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +22,18 @@ export const metadata = { title: "Analytics — bran" };
  * deliberate: two screens drawing the same number two different ways is how a
  * brand owner ends up not trusting either.
  */
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
   const now = new Date();
   const { start, end } = reportingWindow(now);
 
   // Best sellers are the inverse of the restock list: whatever the next two
   // weeks will take the most of.
-  const movers = [...STOCK].sort((a, b) => b.forecast14 - a.forecast14).slice(0, 5);
+  const current = await currentWorkspace();
+  const inventory = current ? await loadInventory(current.workspace.id) : null;
+  const movers = (inventory?.lines ?? [])
+    .map((line) => ({ ...line, forecast14: Math.round(line.score.pace * 14) }))
+    .sort((a, b) => b.forecast14 - a.forecast14)
+    .slice(0, 5);
 
   return (
     <div className="w-full">
@@ -82,7 +88,7 @@ export default function AnalyticsPage() {
             </TableHeader>
             <TableBody>
               {movers.map((item) => (
-                <TableRow key={item.sku}>
+                <TableRow key={item.variantId}>
                   <TableCell>
                     <span className="font-medium">{item.name}</span>
                     <span className="block text-[12px] text-muted-foreground">{item.variant}</span>
@@ -94,10 +100,12 @@ export default function AnalyticsPage() {
                     {item.onHand}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
-                    {item.daysCover === null ? (
+                    {item.onHand === 0 ? (
                       <span className="text-negative">Out</span>
+                    ) : item.score.cover === null ? (
+                      "—"
                     ) : (
-                      `${item.daysCover}d`
+                      `${Math.round(item.score.cover)}d`
                     )}
                   </TableCell>
                 </TableRow>

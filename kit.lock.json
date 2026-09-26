@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "registries": {
+    "@ja3dan": "https://gw.jaedan.me/r/{name}.json"
+  },
+  "items": {},
+  "skills": {
+    "app-ui": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "4653151cd23a16e5aa6d71a9125d246d48054b47386354b9fb925d3b70e81e91"
+    },
+    "architect": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "e056ca17831e46e63dbcabfec446985cdcf0153cf3b3d6313fa79b38302bbcc2"
+    },
+    "feature": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "9a58fe7c5e125e4e64da4e4d3a8dc0925c912bdef97074916f331d068b7a0e4c"
+    },
+    "harvest": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "27830da959a5ac0b3a24d4f893a4ee392f1a06564389daf70edcd9c81004ecf3"
+    },
+    "imprint": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "0a1aab54518acd94ac7349b45f7abbf2e805a6eb53634e177725b31c20056be1"
+    },
+    "recover": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "7ff82bbafe3045f3b57608dbd009f1a92c4ca5a55d03788cb8fe1fec5a265d13"
+    },
+    "remember": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "9ac4a34b14eb759be6baf8b6a877c0c8725684e72cd1193873dc76b2df353fd4"
+    },
+    "review": {
+      "source": "@ja3dan/kit",
+      "sourceType": "kit",
+      "version": "0.3.1",
+      "computedHash": "cf75da9ffca734205291d1a6027e0ac1030d10f79453bcaa293dba54506eb3a0"
+    }
+  }
+}
