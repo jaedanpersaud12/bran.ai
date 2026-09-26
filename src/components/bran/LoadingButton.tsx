@@ -21,7 +21,7 @@ export function LoadingButton({
     <Button {...props} disabled={pending || props.disabled} aria-busy={pending}>
       <span className="grid">
         <span
-          className={`col-start-1 row-start-1 transition-opacity duration-150 ${pending ? "opacity-0" : ""}`}
+          className={`col-start-1 row-start-1 inline-flex items-center justify-center gap-1.5 transition-opacity duration-150 ${pending ? "opacity-0" : ""}`}
         >
           {children}
         </span>

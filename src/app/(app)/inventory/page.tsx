@@ -51,6 +51,9 @@ export default async function InventoryPage() {
     <div className="w-full">
       <PageHeader title="Inventory" blurb={BLURB}>
         <Button asChild variant="outline" size="sm">
+          <Link href="/inventory/purchase-orders">Purchase orders</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
           <Link href="/inventory/catalog">Manage catalog</Link>
         </Button>
       </PageHeader>

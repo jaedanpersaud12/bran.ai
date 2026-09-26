@@ -7,14 +7,21 @@ import { Sparkles } from "lucide-react";
  * `title` says what the model did and didn't decide, for anyone who hovers;
  * the sr-only label says it for screen readers.
  */
-export function AiMark({ title }: { title: string }) {
+export function AiMark({
+  title,
+  label = "Explained by AI",
+}: {
+  title: string;
+  /** What screen readers hear: "Explained by AI" for a reason, "Written by AI" for a draft. */
+  label?: string;
+}) {
   return (
     <span
       title={title}
       className="ml-1.5 inline-flex translate-y-[1px] items-center text-subtle-foreground"
     >
       <Sparkles aria-hidden className="size-3" strokeWidth={1.5} />
-      <span className="sr-only">Explained by AI</span>
+      <span className="sr-only">{label}</span>
     </span>
   );
 }

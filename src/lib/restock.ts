@@ -76,6 +76,21 @@ export function scoreVariant(input: VariantInput): Score {
     };
   }
 
+  // Stock on the way that restock itself would have ordered is the plan
+  // working, not overstock: the formula orders for lead time + a month, which
+  // is more than HOLD_COVER_DAYS, so without this it would tell you to trim
+  // the very order it suggested. Only cover beyond what it would order (plus
+  // the buffer) is worth trimming.
+  const planned = input.leadTimeDays + COVER_TARGET_DAYS + SAFETY_BUFFER_DAYS;
+  if (input.onOrder > 0 && pace > 0 && cover !== null && cover <= planned) {
+    return {
+      ...base,
+      verdict: "watch",
+      suggested: 0,
+      reason: `${input.onOrder} on order covers the ${input.leadTimeDays}-day wait, with ${days(cover)} of cover in all. Nothing more to order.`,
+    };
+  }
+
   if (pace === 0 || falling || (cover !== null && cover > HOLD_COVER_DAYS)) {
     return { ...base, verdict: "hold", suggested: 0, reason: holdReason(input, pace, cover, falling) };
   }

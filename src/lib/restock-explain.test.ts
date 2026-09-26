@@ -123,5 +123,5 @@ test("the prompt carries each line's numbers and id", () => {
   const prompt = buildPrompt([blackS]);
   assert.match(prompt, /"id": "v-black-s"/);
   assert.match(prompt, /"order_quantity": 76/);
-  assert.match(prompt, /"days_of_cover": 3/);
+  assert.match(prompt, /"days_of_cover_including_on_order": 3/);
 });
