@@ -15,9 +15,9 @@ import StreamingText from "@/components/primitives/StreamingText";
 import ThinkingState from "@/components/primitives/ThinkingState";
 import ToolChips from "@/components/primitives/ToolChips";
 import TaskRows from "@/components/primitives/TaskRows";
-import PromptBar from "@/components/primitives/PromptBar";
 import { useReducedMotion } from "@/hooks/use-media-query";
-import { ASSISTANT, CONVERSATIONS } from "@/lib/demo";
+import { StatusPill } from "@/components/ui/status-pill";
+import { CONVERSATIONS } from "@/lib/demo";
 
 /**
  * The assistant, as a panel rather than a section.
@@ -161,26 +161,24 @@ export function Assistant() {
         >
           <MessageCircleIcon ref={icon} size={14} className="shrink-0 text-muted-foreground" />
           <span className="flex-1">Assistant</span>
-          {/* The count is the reason to open it, so it goes on the trigger. */}
-          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-            {ASSISTANT.handled.toLocaleString()}
-          </span>
+          {/* Said on the trigger, before anyone opens it: nothing inside is live yet. */}
+          <span className="text-[11px] text-muted-foreground">Sample</span>
         </button>
       </SheetTrigger>
 
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
         <SheetHeader className="border-b border-border p-5">
-          <SheetTitle className="text-[15px]">Assistant</SheetTitle>
+          <SheetTitle className="flex items-center gap-2 text-[15px]">
+            Assistant
+            <StatusPill tone="neutral" className="px-1.5 py-0 text-[10.5px]">
+              Sample
+            </StatusPill>
+          </SheetTitle>
           <SheetDescription className="text-[13px]">
-            Trained on this brand&apos;s own conversations, so it answers a customer in the
-            language they asked in.
+            A preview of what the assistant will do: answer customer DMs in the language they
+            wrote in, and run the day&apos;s dispatch. These conversations are written
+            examples, not your workspace&apos;s data.
           </SheetDescription>
-
-          <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-[12.5px]">
-            <Figure label="Handled" value={`${Math.round(ASSISTANT.handledShare * 100)}%`} />
-            <Figure label="Orders closed" value={ASSISTANT.ordersClosed.toLocaleString()} />
-            <Figure label="Median reply" value={`${ASSISTANT.medianReplySeconds}s`} />
-          </dl>
 
           {/* Our own tabs rather than the composer's, because switching has to
               swap the whole thread — the trace, the tool calls and the answer
@@ -224,7 +222,7 @@ export function Assistant() {
               animation when you switch, instead of showing the last thread's
               finished state under the new thread's heading. */}
           <div key={conversation.key} className="space-y-4">
-            <ThinkingState variant={conversation.thinking} onSettled={onSettled} />
+            <ThinkingState trace={conversation.trace} onSettled={onSettled} />
 
             {stage >= 1 && toolBlock === "chips" ? (
               <div className="step-in">
@@ -250,34 +248,24 @@ export function Assistant() {
                   loop={false}
                   content={tokens(conversation.answer)}
                   sources={[]}
-                  followUps={conversation.followUps}
-                  labels={{ sources: "", followUps: "Follow-ups" }}
+                  followUps={[]}
+                  labels={{ sources: "", followUps: "" }}
                 />
               </div>
             ) : null}
           </div>
         </div>
 
+        {/* No input: a reply box that goes nowhere teaches people the AI is
+            decoration. Ask bran (build-plan 06) puts a real one here. */}
         <div className="border-t border-border p-4">
-          {/* `demo` off: the walkthrough that drives its own menus is for
-              their gallery, and in a real panel it opens the slash palette
-              over the thread you are reading. */}
-          <PromptBar demo={false} placeholder="Step in and reply yourself…" />
-          <p className="mt-2 text-[11.5px] text-muted-foreground">
-            Replying yourself hands the thread back to you. The assistant stops until you
-            release it.
+          <p className="text-[12.5px] leading-relaxed text-muted-foreground">
+            The assistant isn&apos;t live yet, so there&apos;s nothing to type into. When it
+            is, it will work from your real stock, orders and messages, and ask before it
+            changes anything.
           </p>
         </div>
       </SheetContent>
     </Sheet>
-  );
-}
-
-function Figure({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-[11px] tracking-[0.08em] text-muted-foreground uppercase">{label}</dt>
-      <dd className="mt-0.5 font-medium tabular-nums">{value}</dd>
-    </div>
   );
 }

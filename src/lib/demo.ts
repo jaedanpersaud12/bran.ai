@@ -13,6 +13,7 @@
  * brand the product was designed against.
  */
 
+import type { Trace } from "@/components/primitives/ThinkingState";
 import { formatMoney, formatMoneyWhole, type Delta } from "@/lib/metrics";
 
 export { formatMoney, formatMoneyWhole };
@@ -226,59 +227,7 @@ export const USAGE = {
   ordersIncluded: null as number | null,
   storefrontsUsed: 2,
   storefrontsIncluded: 2,
-  assistantReplies: 1_118,
   renewsOn: "October 1, 2026",
-};
-
-/* --------------------------------------------------------------- Assistant */
-
-export type Turn = {
-  from: "customer" | "assistant";
-  body: string;
-  at: string;
-  /** What the assistant did besides talk. */
-  action?: string;
-};
-
-/**
- * One thread, as it actually reads.
- *
- * The dialect is the point, not decoration: the concept is an assistant
- * trained on the brand's own conversations, and a Trinidadian customer asking
- * "yuh have dat in a small?" is the sentence it has to answer without being
- * translated into customer-service English first.
- */
-export const THREAD: Turn[] = [
-  { from: "customer", body: "hey doux doux, yuh have de black triangle top in a small still?", at: "09:12" },
-  {
-    from: "assistant",
-    body: "Morning! Small in black — we down to 4, so I hold one for you for the next 2 hours. The medium finish since Friday but 60 more coming Thursday.",
-    at: "09:12",
-    action: "Reserved FLV-TRI-BLK-S · 1 unit",
-  },
-  { from: "customer", body: "perfect. how much wid delivery to chaguanas?", at: "09:14" },
-  {
-    from: "assistant",
-    body: "TT$295 for the top, TT$35 Zoom TT to Chaguanas — TT$330 all in. Want me send the payment link?",
-    at: "09:14",
-    action: "Quoted courier · Zoom TT",
-  },
-  { from: "customer", body: "yes pls", at: "09:15" },
-  {
-    from: "assistant",
-    body: "Sent. Once it clear I put it straight in today's dispatch — should reach you tomorrow.",
-    at: "09:15",
-    action: "Created order BRN-4822 · awaiting payment",
-  },
-];
-
-export const ASSISTANT = {
-  /** Conversations it handled end to end without a person stepping in. */
-  handled: 1_118,
-  handledShare: 0.83,
-  /** Orders that started in a DM and were closed by the assistant. */
-  ordersClosed: 604,
-  medianReplySeconds: 9,
 };
 
 /* ------------------------------------------------- Assistant conversations */
@@ -300,9 +249,8 @@ export type Conversation = {
   opener: string;
   /** How the reply reads, one word per token so it can stream. */
   answer: string;
-  /** Reasoning shown behind "Thought for Ns". */
-  thinking: "Steps" | "Reasoning" | "Search" | "Coding";
-  followUps: string[];
+  /** The steps shown behind "Thought for Ns" — what the finished feature would run. */
+  trace: Trace;
 };
 
 export const CONVERSATIONS: Conversation[] = [
@@ -313,26 +261,16 @@ export const CONVERSATIONS: Conversation[] = [
     opener: "hey doux doux, yuh have de black triangle top in a small still?",
     answer:
       "Small in black — we down to 4, so I hold one for you for the next 2 hours. The medium finish since Friday but 60 more coming Thursday. With Zoom TT to Chaguanas that is TT$330 all in.",
-    thinking: "Search",
-    followUps: [
-      "Send her the payment link",
-      "Hold the last small for someone else",
-      "What else does she usually buy",
-    ],
-  },
-  {
-    key: "restock",
-    name: "Restock",
-    who: "You · Inventory",
-    opener: "what do I need to reorder before the weekend?",
-    answer:
-      "Four lines. The black triangle top in small and medium are the urgent ones — small has 3 days of cover and medium has been out since Friday with 11 people asking. The Buccoo wrap goes with that top in 6 of every 10 carts, so I would order it in the same run.",
-    thinking: "Reasoning",
-    followUps: [
-      "Draft the purchase order",
-      "Why is the wrap skirt moving so fast",
-      "What happens if I wait until Monday",
-    ],
+    trace: {
+      kind: "Steps",
+      active: "Working",
+      done: "Took 3 steps",
+      rows: [
+        { primary: "Read her message", secondary: "Black · S, availability" },
+        { primary: "Looked up stock", secondary: "FLV-TRI-BLK-S" },
+        { primary: "Priced delivery", secondary: "Zoom TT · Chaguanas" },
+      ],
+    },
   },
   {
     key: "dispatch",
@@ -341,11 +279,15 @@ export const CONVERSATIONS: Conversation[] = [
     opener: "is today's run ready to go?",
     answer:
       "Six orders are packed and paid, waiting on Zoom TT. Three are still unpaid and I am holding their stock for another hour. One Tobago order needs Moving Solutions instead — they only collect on Tuesdays.",
-    thinking: "Steps",
-    followUps: [
-      "Release the unpaid holds",
-      "Book the Tobago collection",
-      "Print the packing slips",
-    ],
+    trace: {
+      kind: "Steps",
+      active: "Working",
+      done: "Took 3 steps",
+      rows: [
+        { primary: "Read today's orders", secondary: "10 open" },
+        { primary: "Checked payments" },
+        { primary: "Matched couriers to areas" },
+      ],
+    },
   },
 ];

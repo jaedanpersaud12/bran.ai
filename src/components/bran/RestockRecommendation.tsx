@@ -3,6 +3,7 @@
 import RecommendationCard, { type RecommendationOption } from "@/components/primitives/RecommendationCard";
 import { EntityChip } from "@/components/atoms/EntityChip";
 import { ValuePill } from "@/components/atoms/ValuePill";
+import { AiMark, RESTOCK_AI_TITLE } from "@/components/bran/AiMark";
 import { draftPurchaseOrder } from "@/actions/purchase-orders";
 import type { RestockLine } from "@/lib/inventory";
 import { formatMoneyWhole } from "@/lib/metrics";
@@ -12,7 +13,7 @@ import type { RestockSummary } from "@/lib/restock";
 const THIS_WEEK = 7;
 
 /**
- * The model's call, built from the same scored lines as the planner below it.
+ * Restock's call, built from the same scored lines as the planner below it.
  *
  * Up to three options: order everything restock flagged, order only what runs
  * out this week, or order nothing and accept the projected loss. Accepting an
@@ -48,6 +49,7 @@ export function RestockRecommendation({
           <ValuePill tone="green">{summary.units} units</ValuePill> for{" "}
           {formatMoneyWhole(summary.costCents / 100)}. Most urgent: <EntityChip name={top.name} />{" "}
           {top.variant.toLowerCase()} — {lowerFirst(top.reason)}
+          {top.reasonSource === "model" ? <AiMark title={RESTOCK_AI_TITLE} /> : null}
         </>
       ),
       short: `Reorder all ${reorders.length} · ${summary.units} units`,
@@ -100,7 +102,7 @@ export function RestockRecommendation({
 
   return (
     <RecommendationCard
-      labels={{ title: "Want me to draft this reorder?" }}
+      labels={{ title: "Draft this reorder?" }}
       options={options}
       onAccept={accept}
     />

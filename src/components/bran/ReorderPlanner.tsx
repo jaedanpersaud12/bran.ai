@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, Minus, Plus, Sparkles, Undo2 } from "lucide-react";
+import { Check, Minus, Plus, Undo2 } from "lucide-react";
+import { AiMark, RESTOCK_AI_TITLE } from "@/components/bran/AiMark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -59,7 +60,7 @@ export function ReorderPlanner({ items }: { items: RestockLine[] }) {
       lines: lines.length,
       units: lines.reduce((sum, item) => sum + quantities[item.variantId], 0),
       cost: lines.reduce((sum, item) => sum + quantities[item.variantId] * item.unitCostCents, 0) / 100,
-      /** Lines where the buyer has overruled the model. */
+      /** Lines where the buyer has overruled restock. */
       changed: lines.filter((item) => quantities[item.variantId] !== item.score.suggested).length,
     };
   }, [items, picked, quantities]);
@@ -164,17 +165,7 @@ export function ReorderPlanner({ items }: { items: RestockLine[] }) {
                     </Badge>
                     <span className="block">
                       {item.reason}
-                      {/* Said, not just styled: the reader should know which
-                          sentences a model wrote. */}
-                      {item.reasonSource === "model" ? (
-                        <span
-                          title="Written by the model from the numbers in this row. The verdict and quantity are the formula's."
-                          className="ml-1.5 inline-flex translate-y-[1px] items-center gap-0.5 text-[11px] text-subtle-foreground"
-                        >
-                          <Sparkles aria-hidden className="size-3" strokeWidth={1.5} />
-                          <span className="sr-only">Explained by the model</span>
-                        </span>
-                      ) : null}
+                      {item.reasonSource === "model" ? <AiMark title={RESTOCK_AI_TITLE} /> : null}
                     </span>
                   </TableCell>
 
@@ -195,7 +186,7 @@ export function ReorderPlanner({ items }: { items: RestockLine[] }) {
                           className="flex items-center gap-1 rounded text-[11.5px] text-muted-foreground transition-[color] duration-150 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"
                         >
                           <Undo2 className="size-3" strokeWidth={1.5} />
-                          Model said {suggested}
+                          Restock said {suggested}
                         </button>
                       ) : null}
                     </div>

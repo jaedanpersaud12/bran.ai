@@ -14,38 +14,8 @@ const HOLD_MS = 3400;
 /* one streamed word, or a `cite` placeholder that renders an inline source chip */
 export type StreamingToken = { text: string; cite?: boolean };
 
-const TOKENS: StreamingToken[] = [
-  ..."Pistachio is your fastest-growing flavor — sales are up 23% this month and margins beat vanilla by 8 points."
-    .split(" ")
-    .map((text) => ({ text })),
-  { text: "", cite: true },
-  ..."Stone-fruit flavors are trending in the same range."
-    .split(" ")
-    .map((text) => ({ text })),
-];
-
-const FOLLOW_UPS = [
-  "Which flavors sell best in winter",
-  "Compare gelato and soft serve margins",
-];
-
-const SOURCE_IMAGES = {
-  scoop:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231f7a5f'/%3E%3Cpath d='M20 36c0 7 5.4 12 12 12s12-5 12-12H20Z' fill='%23fff'/%3E%3Ccircle cx='32' cy='25' r='11' fill='%23bff3dd'/%3E%3Cpath d='M24 24c4-7 13-7 17 0' fill='none' stroke='%231f7a5f' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E",
-  trends:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232f6fec'/%3E%3Cpath d='M15 43 27 31l8 7 14-18' fill='none' stroke='%23fff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='49' cy='20' r='5' fill='%23bfe0ff'/%3E%3C/svg%3E",
-  market:
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23e56d24'/%3E%3Cpath d='M17 45V25h8v20h-8Zm11 0V16h8v29h-8Zm11 0V30h8v15h-8Z' fill='%23fff'/%3E%3Cpath d='M16 49h32' stroke='%23ffd6b8' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E",
-};
-
 /* one cited source rendered as an inline chip and in the sources list */
 export type StreamingSource = { name: string; domain: string; href: string; image: string };
-
-const SOURCES: StreamingSource[] = [
-  { name: "Scoop Data", domain: "scoopdata.io", href: "https://scoopdata.io/", image: SOURCE_IMAGES.scoop },
-  { name: "Trends Index", domain: "trends.google.com", href: "https://trends.google.com/trends/", image: SOURCE_IMAGES.trends },
-  { name: "Market Basket", domain: "marketbasket.io", href: "https://marketbasket.io/", image: SOURCE_IMAGES.market },
-];
 
 function sourceImage(source: StreamingSource) {
   return source.image;
@@ -89,9 +59,9 @@ const DEFAULT_LABELS: StreamingLabels = {
 };
 
 export default function StreamingText({
-  content = TOKENS,
-  sources = SOURCES,
-  followUps = FOLLOW_UPS,
+  content,
+  sources,
+  followUps,
   labels,
   loop = true,
   fill = false,
@@ -100,11 +70,11 @@ export default function StreamingText({
 }: {
   variant?: string;
   /** the streamed tokens; `cite` tokens render an inline source chip */
-  content?: StreamingToken[];
+  content: StreamingToken[];
   /** cited sources shown in the chip, avatar stack, and expanded list */
-  sources?: StreamingSource[];
+  sources: StreamingSource[];
   /** follow-up prompt suggestions shown once the stream completes */
-  followUps?: string[];
+  followUps: string[];
   /** prominent copy strings */
   labels?: Partial<StreamingLabels>;
   /** restart the stream after a hold; turn off when embedding in a real thread */
@@ -114,7 +84,7 @@ export default function StreamingText({
   onDone?: () => void;
   /** fired when a follow-up prompt is chosen */
   onFollowUp?: (text: string, index: number) => void;
-} = {}) {
+}) {
   const l = { ...DEFAULT_LABELS, ...labels };
   const [count, setCount] = useState(0);
   const [sourcesOpen, setSourcesOpen] = useState(false);

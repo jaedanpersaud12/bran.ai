@@ -141,17 +141,6 @@ export const BUDGET = {
   ],
 };
 
-/**
- * The one line on the screen the assistant wrote. Split in three so the claim
- * can sit in the reading colour and the figure it turns on can be emphasised,
- * without putting HTML in a string.
- */
-export const INSIGHT = {
-  before: "Unused budget runway improved by ",
-  figure: "3.5% this month",
-  after: " vs. trailing burn.",
-};
-
 export const TAX_PAYMENT = {
   label: "Corporation tax",
   paidOn: new Date("2026-03-24T00:00:00Z"),

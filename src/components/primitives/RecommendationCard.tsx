@@ -2,8 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Button, type ButtonVariant } from "@/components/atoms/Button";
-import { EntityChip } from "@/components/atoms/EntityChip";
-import { ValuePill } from "@/components/atoms/ValuePill";
 
 /* ─────────────────────────────────────────────────────────
  * RECOMMENDATION CARD
@@ -37,53 +35,6 @@ const DEFAULT_LABELS: RecommendationLabels = {
   accepted: "Accepted",
 };
 
-const OPTIONS: RecommendationOption[] = [
-  {
-    key: "high",
-    body: (
-      <>
-        Reorder waffle cones from{" "}
-        <EntityChip name="Cone King" />{" "}
-        with lead time <ValuePill tone="green">7 days</ValuePill>
-      </>
-    ),
-    short: "Reorder from Cone King · 7-day lead",
-    signal: 3,
-    tone: "var(--green)",
-    label: "High confidence",
-    cta: "Accept",
-    ctaVariant: "accent",
-  },
-  {
-    key: "review",
-    body: (
-      <>
-        Switch vanilla to <ValuePill>Vanilla Madagascar</ValuePill> for peak season.
-      </>
-    ),
-    short: "Switch to Vanilla Madagascar",
-    signal: 2,
-    tone: "var(--orange)",
-    label: "Needs review",
-    cta: "Configure",
-    ctaVariant: "primary",
-  },
-  {
-    key: "none",
-    body: (
-      <>
-        Fall back to a <span className="font-medium text-ink">full restock</span> across every SKU.
-      </>
-    ),
-    short: "Full restock across every SKU",
-    signal: 0,
-    tone: "var(--ink-3)",
-    label: "No signal",
-    cta: "Accept full restock",
-    ctaVariant: "primary",
-  },
-];
-
 function Meter({ signal, tone }: { signal: number; tone: string }) {
   return (
     <span className="flex items-end gap-0.5">
@@ -99,11 +50,11 @@ function Meter({ signal, tone }: { signal: number; tone: string }) {
 }
 
 export default function RecommendationCard({
-  options = OPTIONS,
+  options,
   labels,
   onAccept,
 }: {
-  options?: RecommendationOption[];
+  options: RecommendationOption[];
   labels?: Partial<RecommendationLabels>;
   variant?: string;
   /**
@@ -112,7 +63,7 @@ export default function RecommendationCard({
    * the work behind it has actually happened.
    */
   onAccept?: (key: string) => Promise<string | null>;
-} = {}) {
+}) {
   const t = { ...DEFAULT_LABELS, ...labels };
   const [selected, setSelected] = useState(0);
   const [open, setOpen] = useState(false);

@@ -17,6 +17,7 @@ export default function TeamPage() {
   return (
     <div className="w-full">
       <PageHeader
+        sample="These team members are examples. Invites come with onboarding."
         title="Team"
         blurb="Everyone with access to FLVS Swim. Accounts are shared with the storefront, so a person signs in once and lands wherever their role allows."
       >

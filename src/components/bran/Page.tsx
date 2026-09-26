@@ -1,4 +1,5 @@
 import { DeltaBadge } from "@/components/bran/DeltaBadge";
+import { StatusPill } from "@/components/ui/status-pill";
 import type { Delta } from "@/lib/metrics";
 
 /**
@@ -15,10 +16,17 @@ import type { Delta } from "@/lib/metrics";
 export function PageHeader({
   title,
   blurb,
+  sample,
   children,
 }: {
   title: string;
   blurb?: string;
+  /**
+   * Set on a screen still reading demo data: what's placeholder and what makes
+   * it real. Shown under the title with a "Sample data" pill, so no invented
+   * figure is ever read as the workspace's own (ui-rules: "How AI is presented").
+   */
+  sample?: string;
   /** The section's actions, opposite the title. */
   children?: React.ReactNode;
 }) {
@@ -29,6 +37,14 @@ export function PageHeader({
         {blurb ? (
           <p className="mt-2 max-w-prose text-[13px] leading-relaxed text-muted-foreground">
             {blurb}
+          </p>
+        ) : null}
+        {sample ? (
+          <p className="mt-3 flex max-w-prose flex-wrap items-center gap-2 text-[12.5px] text-muted-foreground">
+            <StatusPill tone="neutral" className="px-1.5 py-0 text-[10.5px]">
+              Sample data
+            </StatusPill>
+            {sample}
           </p>
         ) : null}
       </div>

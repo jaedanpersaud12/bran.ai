@@ -1,9 +1,9 @@
 # Progress
 
-**Stage:** 04 — Truth pass
-**Last completed:** 03 — verified live on `feat/03-ai-deepseek` (PRs #1 → #2 → 03 stacked)
+**Stage:** 05 — Purchase orders & supplier email
+**Last completed:** 04 — truth pass on `feat/04-truth-pass` (stacked on the plan branch → #3)
 **Active feature:** none
-**Next:** 04 (truth pass), then 05 purchase orders, 06 Ask bran
+**Next:** 05 purchase orders, then 06 Ask bran
 **Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
@@ -14,7 +14,7 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 - [x] **01** Restock engine
 - [x] **02** Catalog & stock editing
 - [x] **03** AI layer on DeepSeek
-- [ ] **04** Truth pass (honest AI surfaces)
+- [x] **04** Truth pass (honest AI surfaces)
 - [ ] **05** Purchase orders & supplier email
 - [ ] **06** Ask bran (the real assistant)
 - [ ] **07** Catalog import (text and photo)
