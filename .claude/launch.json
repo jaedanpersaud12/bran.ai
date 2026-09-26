@@ -20,6 +20,20 @@
         "3002"
       ],
       "port": 3002
+    },
+    {
+      "name": "bran-prod-noai",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "DEEPSEEK_API_KEY=",
+        "pnpm",
+        "exec",
+        "next",
+        "start",
+        "-p",
+        "3003"
+      ],
+      "port": 3003
     }
   ]
 }

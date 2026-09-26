@@ -4,6 +4,7 @@ import { CatalogTable } from "@/components/bran/CatalogTable";
 import { PageHeader } from "@/components/bran/Page";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { aiConfigured } from "@/lib/ai/model";
 import { loadCatalog } from "@/lib/catalog";
 import { currentWorkspace } from "@/lib/workspace";
 
@@ -32,7 +33,7 @@ export default async function CatalogPage() {
       </PageHeader>
 
       {current ? (
-        <CatalogTable rows={await loadCatalog(current.workspace.id)} />
+        <CatalogTable rows={await loadCatalog(current.workspace.id)} canImport={aiConfigured} />
       ) : (
         <EmptyState
           icon={<Package />}
