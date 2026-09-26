@@ -18,62 +18,6 @@ import { formatMoney, formatMoneyWhole, type Delta } from "@/lib/metrics";
 export { formatMoney, formatMoneyWhole };
 export type { Delta };
 
-/* ---------------------------------------------------------------- Inventory */
-
-export type StockState = "healthy" | "low" | "out" | "incoming";
-
-export type StockItem = {
-  sku: string;
-  name: string;
-  variant: string;
-  onHand: number;
-  /** What the restock model thinks the next fourteen days will take. */
-  forecast14: number;
-  /** Days of cover left at the current rate. `null` once it is already out. */
-  daysCover: number | null;
-  state: StockState;
-  /** What the model wants done, in the brand owner's words. */
-  advice: string;
-  /**
-   * How many units it would order today. Zero where it would leave the line
-   * alone. Held as a number rather than read out of `advice` — the sentence is
-   * for the reader, and parsing prose to drive a form is how a stray comma
-   * ends up ordering four thousand bikinis.
-   */
-  suggested: number;
-  /** Landed cost per unit, in dollars. */
-  unitCost: number;
-};
-
-export const STOCK: StockItem[] = [
-  { sku: "FLV-TRI-BLK-S", name: "Tobago triangle top", variant: "Black · S", onHand: 4, forecast14: 22, daysCover: 3, state: "low", advice: "Reorder 40 — sells out in 3 days at Carnival pace" , suggested: 40, unitCost: 68 },
-  { sku: "FLV-TRI-BLK-M", name: "Tobago triangle top", variant: "Black · M", onHand: 0, forecast14: 26, daysCover: null, state: "out", advice: "Out since Friday. 11 DMs asking. Reorder 60" , suggested: 60, unitCost: 68 },
-  { sku: "FLV-BND-RED-M", name: "Maracas bandeau", variant: "Flame · M", onHand: 9, forecast14: 18, daysCover: 7, state: "low", advice: "Reorder 30 before the weekend drop" , suggested: 30, unitCost: 74 },
-  { sku: "FLV-HIP-SND-L", name: "Store Bay high-waist", variant: "Sand · L", onHand: 31, forecast14: 12, daysCover: 36, state: "healthy", advice: "Holding. No action" , suggested: 0, unitCost: 82 },
-  { sku: "FLV-ONE-NVY-S", name: "Pigeon Point one-piece", variant: "Navy · S", onHand: 18, forecast14: 15, daysCover: 17, state: "healthy", advice: "Holding. Watch after the shoot goes live" , suggested: 0, unitCost: 96 },
-  { sku: "FLV-WRP-GRN-U", name: "Buccoo wrap skirt", variant: "Palm · One size", onHand: 6, forecast14: 20, daysCover: 4, state: "low", advice: "Reorder 45 — pairs with the triangle top in 6 of 10 carts" , suggested: 45, unitCost: 76 },
-  { sku: "FLV-TRI-WHT-L", name: "Tobago triangle top", variant: "Coconut · L", onHand: 52, forecast14: 9, daysCover: 80, state: "incoming", advice: "80 more land Thursday. Consider pausing that PO" , suggested: 0, unitCost: 68 },
-];
-
-/**
- * Derived, not typed in. The stat row, the planner's totals and the button's
- * count all read from the same lines, so they cannot drift apart the first
- * time a quantity changes.
- */
-export const RESTOCK_SIGNAL = {
-  get flagged() {
-    return STOCK.filter((item) => item.suggested > 0).length;
-  },
-  get units() {
-    return STOCK.reduce((sum, item) => sum + item.suggested, 0);
-  },
-  get cost() {
-    return STOCK.reduce((sum, item) => sum + item.suggested * item.unitCost, 0);
-  },
-  /** A projection rather than a sum, so it stays an explicit figure. */
-  atRisk: 38_900,
-};
-
 /* ------------------------------------------------------------------- Orders */
 
 export type FulfilmentState =

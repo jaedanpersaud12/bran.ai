@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start -p 3001",
     "db:setup": "node --env-file=.env.local scripts/apply-schema.mjs",
+    "db:seed": "node --env-file=.env.local scripts/seed.mjs",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test 'src/**/*.test.ts'",
     "check": "tsc --noEmit && eslint .",
     "lint": "eslint ."
   },

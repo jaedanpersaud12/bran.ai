@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Check, Minus, Plus, Undo2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatMoneyWhole, type StockItem } from "@/lib/demo";
+import { draftPurchaseOrder } from "@/actions/purchase-orders";
+import type { RestockLine } from "@/lib/inventory";
+import { formatMoneyWhole } from "@/lib/metrics";
+import type { Verdict } from "@/lib/restock";
 
 /**
  * Turning the model's advice into an order.
@@ -32,36 +35,56 @@ import { formatMoneyWhole, type StockItem } from "@/lib/demo";
 /** Nothing sensible orders a negative quantity, and 999 is already absurd. */
 const MAX = 999;
 
-export function ReorderPlanner({ items }: { items: StockItem[] }) {
+const VERDICT: Record<Verdict, { label: string; variant: "destructive" | "outline" | "secondary" }> = {
+  reorder: { label: "Reorder", variant: "destructive" },
+  watch: { label: "Watch", variant: "outline" },
+  hold: { label: "Hold", variant: "secondary" },
+};
+
+export function ReorderPlanner({ items }: { items: RestockLine[] }) {
   const [quantities, setQuantities] = useState<Record<string, number>>(() =>
-    Object.fromEntries(items.map((item) => [item.sku, item.suggested])),
+    Object.fromEntries(items.map((item) => [item.variantId, item.score.suggested])),
   );
   const [picked, setPicked] = useState<Set<string>>(
-    () => new Set(items.filter((item) => item.suggested > 0).map((item) => item.sku)),
+    () => new Set(items.filter((item) => item.score.suggested > 0).map((item) => item.variantId)),
   );
   const [drafted, setDrafted] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   const order = useMemo(() => {
-    const lines = items.filter((item) => picked.has(item.sku) && quantities[item.sku] > 0);
+    const lines = items.filter((item) => picked.has(item.variantId) && quantities[item.variantId] > 0);
     return {
+      items: lines,
       lines: lines.length,
-      units: lines.reduce((sum, item) => sum + quantities[item.sku], 0),
-      cost: lines.reduce((sum, item) => sum + quantities[item.sku] * item.unitCost, 0),
+      units: lines.reduce((sum, item) => sum + quantities[item.variantId], 0),
+      cost: lines.reduce((sum, item) => sum + quantities[item.variantId] * item.unitCostCents, 0) / 100,
       /** Lines where the buyer has overruled the model. */
-      changed: lines.filter((item) => quantities[item.sku] !== item.suggested).length,
+      changed: lines.filter((item) => quantities[item.variantId] !== item.score.suggested).length,
     };
   }, [items, picked, quantities]);
 
-  const setQuantity = (sku: string, next: number) => {
-    setQuantities((current) => ({ ...current, [sku]: clamp(next, 0, MAX) }));
+  const setQuantity = (id: string, next: number) => {
+    setQuantities((current) => ({ ...current, [id]: clamp(next, 0, MAX) }));
     setDrafted(null);
   };
 
-  const toggle = (sku: string) => {
+  const draft = () => {
+    setError(null);
+    startTransition(async () => {
+      const result = await draftPurchaseOrder(
+        order.items.map((item) => ({ variantId: item.variantId, quantity: quantities[item.variantId] })),
+      );
+      if (result.ok) setDrafted(result.reference);
+      else setError(result.error);
+    });
+  };
+
+  const toggle = (id: string) => {
     setPicked((current) => {
       const next = new Set(current);
-      if (next.has(sku)) next.delete(sku);
-      else next.add(sku);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
     setDrafted(null);
@@ -80,7 +103,7 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
                   checked={allPicked}
                   aria-label={allPicked ? "Clear selection" : "Select every line"}
                   onCheckedChange={() =>
-                    setPicked(allPicked ? new Set() : new Set(items.map((i) => i.sku)))
+                    setPicked(allPicked ? new Set() : new Set(items.map((i) => i.variantId)))
                   }
                 />
               </TableHead>
@@ -95,16 +118,18 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
 
           <TableBody>
             {items.map((item) => {
-              const quantity = quantities[item.sku];
-              const selected = picked.has(item.sku);
-              const overruled = selected && quantity !== item.suggested;
+              const quantity = quantities[item.variantId];
+              const selected = picked.has(item.variantId);
+              const suggested = item.score.suggested;
+              const overruled = selected && quantity !== suggested;
+              const verdict = VERDICT[item.score.verdict];
 
               return (
-                <TableRow key={item.sku} data-state={selected ? "selected" : undefined}>
+                <TableRow key={item.variantId} data-state={selected ? "selected" : undefined}>
                   <TableCell>
                     <Checkbox
                       checked={selected}
-                      onCheckedChange={() => toggle(item.sku)}
+                      onCheckedChange={() => toggle(item.variantId)}
                       aria-label={`Include ${item.name}, ${item.variant}`}
                     />
                   </TableCell>
@@ -116,18 +141,28 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
                     </span>
                   </TableCell>
 
-                  <TableCell className="text-right tabular-nums">{item.onHand}</TableCell>
-
                   <TableCell className="text-right tabular-nums">
-                    {item.daysCover === null ? (
-                      <Badge variant="destructive">Out</Badge>
-                    ) : (
-                      `${item.daysCover}d`
-                    )}
+                    {item.onHand === 0 ? <Badge variant="destructive">Out</Badge> : item.onHand}
+                    {item.onOrder > 0 ? (
+                      <span className="block text-[11.5px] text-muted-foreground">
+                        +{item.onOrder} coming
+                      </span>
+                    ) : null}
                   </TableCell>
 
-                  <TableCell className="max-w-[24rem] whitespace-normal text-[12.5px] text-muted-foreground">
-                    {item.advice}
+                  <TableCell className="text-right tabular-nums">
+                    {item.score.cover === null
+                      ? "—"
+                      : item.score.cover > 90
+                        ? "90d+"
+                        : `${Math.round(item.score.cover)}d`}
+                  </TableCell>
+
+                  <TableCell className="max-w-[24rem] min-w-56 whitespace-normal text-[12.5px] text-muted-foreground">
+                    <Badge variant={verdict.variant} className="mb-1">
+                      {verdict.label}
+                    </Badge>
+                    <span className="block">{item.score.reason}</span>
                   </TableCell>
 
                   <TableCell>
@@ -136,18 +171,18 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
                         value={quantity}
                         disabled={!selected}
                         label={`Units of ${item.name}, ${item.variant}`}
-                        onChange={(next) => setQuantity(item.sku, next)}
+                        onChange={(next) => setQuantity(item.variantId, next)}
                       />
                       {/* The override is stated, not just coloured — the point
                           of the suggestion is that you can see you left it. */}
                       {overruled ? (
                         <button
                           type="button"
-                          onClick={() => setQuantity(item.sku, item.suggested)}
+                          onClick={() => setQuantity(item.variantId, suggested)}
                           className="flex items-center gap-1 rounded text-[11.5px] text-muted-foreground transition-[color] duration-150 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none"
                         >
                           <Undo2 className="size-3" strokeWidth={1.5} />
-                          Model said {item.suggested}
+                          Model said {suggested}
                         </button>
                       ) : null}
                     </div>
@@ -157,12 +192,12 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
                     {selected && quantity > 0 ? (
                       <>
                         <span className="font-medium">
-                          {formatMoneyWhole(quantity * item.unitCost)}
+                          {formatMoneyWhole((quantity * item.unitCostCents) / 100)}
                         </span>
                         {/* The arithmetic, so the total is checkable without
                             opening a calculator. */}
                         <span className="block text-[11.5px] text-muted-foreground">
-                          {quantity} × {formatMoneyWhole(item.unitCost)}
+                          {quantity} × {formatMoneyWhole(item.unitCostCents / 100)}
                         </span>
                       </>
                     ) : (
@@ -221,12 +256,8 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
               Drafted {drafted}
             </p>
           ) : (
-            <Button
-              size="sm"
-              className="rounded-lg"
-              onClick={() => setDrafted(reference())}
-            >
-              Draft purchase order
+            <Button size="sm" className="rounded-lg" disabled={pending} onClick={draft}>
+              {pending ? "Saving…" : "Draft purchase order"}
             </Button>
           )}
         </div>
@@ -235,6 +266,11 @@ export function ReorderPlanner({ items }: { items: StockItem[] }) {
       {drafted ? (
         <p className="mt-2 text-center text-[12.5px] text-muted-foreground">
           Saved as a draft for you to check. Nothing has been sent to a supplier.
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="mt-2 text-center text-[12.5px] text-negative">
+          {error}
         </p>
       ) : null}
     </div>
@@ -301,11 +337,6 @@ function Step({
       {children}
     </button>
   );
-}
-
-/** `PO-4823`. Sequential in the real thing; arbitrary in a demo. */
-function reference(): string {
-  return `PO-${4800 + Math.floor(Math.random() * 99)}`;
 }
 
 function clamp(value: number, min: number, max: number): number {

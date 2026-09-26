@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button, type ButtonVariant } from "@/components/atoms/Button";
 import { EntityChip } from "@/components/atoms/EntityChip";
 import { ValuePill } from "@/components/atoms/ValuePill";
@@ -101,15 +101,35 @@ function Meter({ signal, tone }: { signal: number; tone: string }) {
 export default function RecommendationCard({
   options = OPTIONS,
   labels,
+  onAccept,
 }: {
   options?: RecommendationOption[];
   labels?: Partial<RecommendationLabels>;
   variant?: string;
+  /**
+   * Carries the accepted option out. Resolves to what the button should say
+   * afterwards, or null when it failed — the card only reads as accepted once
+   * the work behind it has actually happened.
+   */
+  onAccept?: (key: string) => Promise<string | null>;
 } = {}) {
   const t = { ...DEFAULT_LABELS, ...labels };
   const [selected, setSelected] = useState(0);
   const [open, setOpen] = useState(false);
-  const [accepted, setAccepted] = useState(false);
+  const [accepted, setAccepted] = useState<string | false>(false);
+  const [pending, startTransition] = useTransition();
+
+  const accept = () => {
+    if (!onAccept) {
+      setAccepted(t.accepted);
+      return;
+    }
+    const key = options[selected].key;
+    startTransition(async () => {
+      const result = await onAccept(key);
+      if (result) setAccepted(result);
+    });
+  };
 
   const active = options[selected];
   const others = options.map((o, i) => ({ o, i })).filter(({ i }) => i !== selected);
@@ -182,10 +202,11 @@ export default function RecommendationCard({
           <Button
             variant={accepted ? "success" : active.ctaVariant}
             size="sm"
-            onClick={() => setAccepted(true)}
-            className="text-[12.5px]"
+            disabled={pending || accepted !== false}
+            onClick={accept}
+            className="whitespace-nowrap text-[12.5px]"
           >
-            {accepted ? t.accepted : active.cta}
+            {accepted || active.cta}
           </Button>
         </span>
       </div>

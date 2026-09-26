@@ -1,9 +1,9 @@
 # Progress
 
-**Stage:** 01 — <first feature from `build-plan.md`>
-**Last completed:** none
+**Stage:** 02 — Catalog & stock editing
+**Last completed:** 01 — built and verified on `feat/01-restock-engine`, PR not yet opened
 **Active feature:** none
-**Next:** 01
+**Next:** 02
 **Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
@@ -11,15 +11,21 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 
 ## Checklist
 
-<!--
-  One line per numbered feature in build-plan.md, in order, e.g.:
-  - [ ] **01** Homepage
-  - [ ] **02** Auth
-  Fill this in from the real build-plan.md stage 3 produced — don't invent feature
-  numbers or names here that don't match it.
--->
+- [x] **01** Restock engine
+- [ ] **02** Catalog & stock editing
+- [ ] **03** AI layer on DeepSeek
+- [ ] **04** Orders
+- [ ] **05** Courier adapter
+- [ ] **06** Demand signals
+- [ ] **07** Instagram DMs + chatbot
+- [ ] **08** Content pool + scheduler
+- [ ] **09** Billing & tiers
+- [ ] **10** Onboarding & multi-tenant
 
 ## Notes
+
+- DeepSeek is the model provider for all AI (decided 2026-09-26), behind one module.
+- The app is pre-MVP: until 01, every screen read `src/lib/demo.ts`.
 
 <!-- Anything that doesn't fit the status block above but matters across sessions:
      a rebase warning on an open branch, a decision that affects more than one
