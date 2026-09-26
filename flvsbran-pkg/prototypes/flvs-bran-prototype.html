@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flvs.bran — Automate the Life.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf8f4; --panel:#ffffff; --panel2:#f4f0e9; --border:#e7e1d5;
+    --text:#1c1a17; --muted:#8a8378; --accent:#cb352e; --accent2:#a32a24;
+    --warn:#b07d2a; --danger:#cb352e; --hold:#9a927f; --ok:#3f7d4e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',system-ui,-apple-system,sans-serif}
+  body{background:var(--bg);color:var(--text);min-height:100vh}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(420px 300px at 12% 8%,rgba(203,53,46,.10),transparent 70%),
+    radial-gradient(500px 360px at 88% 30%,rgba(203,53,46,.07),transparent 70%),
+    radial-gradient(460px 320px at 40% 95%,rgba(176,125,42,.07),transparent 70%),var(--bg)}
+  h1,h3{font-family:'Cormorant Garamond',Georgia,serif}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px 6px;z-index:50}
+  .tagline{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+  .plan-badge{background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--border);color:var(--accent);padding:7px 16px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+  .plan-badge::before{content:"● ";font-size:8px;vertical-align:1px}
+  nav{display:flex;gap:2px;margin:12px auto 4px;padding:6px;background:#1c1a17;border-radius:999px;width:max-content;max-width:94%;overflow-x:auto;position:sticky;top:12px;z-index:50;box-shadow:0 10px 30px rgba(28,26,23,.18)}
+  nav button{background:none;border:none;border-radius:999px;color:#cfc8bb;padding:9px 16px;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif}
+  nav button.active{background:var(--bg);color:#1c1a17}
+  nav button:hover{color:#fff}
+  nav button.active:hover{color:#1c1a17}
+  main{padding:24px 28px;max-width:1200px;margin:0 auto}
+  .tab{display:none}.tab.active{display:block}
+  h2{font-size:clamp(30px,4.6vw,46px);font-weight:700;letter-spacing:-.03em;text-align:center;margin:14px 0 8px;font-family:'Inter',sans-serif}
+  .sub{color:var(--muted);font-size:14px;margin:0 auto 24px;text-align:center;max-width:660px}
+  .panel .sub,.tier .sub,.day .sub,.modal .sub,.card .sub{text-align:left;margin-left:0}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+  .card{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:20px 18px;box-shadow:0 8px 28px rgba(28,26,23,.06);text-align:center}
+  .card .label{display:inline-block;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:999px;padding:4px 12px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px}
+  .card .value{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:10px}
+  .card .delta{font-size:12px;margin-top:4px;color:var(--muted)}
+  .up{color:var(--ok)}.down{color:var(--danger)}
+  table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.65);backdrop-filter:blur(10px);border-radius:18px;overflow:hidden;font-size:14px;box-shadow:0 8px 28px rgba(28,26,23,.06)}
+  th{background:rgba(244,240,233,.8);color:var(--muted);text-align:left;padding:12px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  td{padding:12px 14px;border-top:1px solid var(--border);vertical-align:middle}
+  tr:hover td{background:#faf6ef}
+  .badge{padding:4px 10px;border-radius:14px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+  .b-reorder{background:#cb352e12;color:var(--accent);border:1px solid var(--accent)}
+  .b-hold{background:#9a927f1a;color:var(--hold);border:1px solid var(--hold)}
+  .b-watch{background:#b07d2a15;color:var(--warn);border:1px solid var(--warn)}
+  .b-low{background:#cb352e12;color:var(--danger);border:1px solid var(--danger)}
+  .b-ok{background:#3f7d4e14;color:var(--ok);border:1px solid var(--ok)}
+  .bar{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;width:80px;display:inline-block;vertical-align:middle}
+  .bar i{display:block;height:100%;border-radius:4px}
+  .btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif}
+  .btn:hover{background:var(--accent2)}
+  .btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+  .btn.secondary:hover{background:#cb352e0d}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn.small{padding:6px 12px;font-size:10px}
+  .btn:disabled{opacity:.4;cursor:default}
+  .reason{color:var(--muted);font-size:12px;max-width:250px;line-height:1.5}
+  .flex{display:flex;gap:12px;align-items:center}
+  .panel{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:22px;margin-bottom:20px;box-shadow:0 8px 28px rgba(28,26,23,.06)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+  input,select,textarea{background:#fff;border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:4px}
+  .field{margin-bottom:12px}
+  .chat{display:flex;flex-direction:column;height:430px}
+  .chat-log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.45}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+  .msg.bot{align-self:flex-start;background:var(--panel2);border:1px solid var(--border);border-bottom-left-radius:4px}
+  .msg .tag{display:block;font-size:10px;margin-top:5px;opacity:.65;letter-spacing:.5px;text-transform:uppercase}
+  .chat-input{display:flex;gap:10px;padding:12px;border-top:1px solid var(--border)}
+  .chat-input input{flex:1}
+  textarea{width:100%;min-height:100px;resize:vertical}
+  .chip{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:4px 12px;font-size:12px;color:var(--muted);margin:3px}
+  .chip.on{border-color:var(--accent);color:var(--accent)}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+  .day{background:rgba(255,255,255,.55);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.8);border-radius:16px;padding:10px;min-height:150px;font-size:12px;box-shadow:0 6px 20px rgba(28,26,23,.05)}
+  .day h4{color:var(--muted);font-size:11px;text-transform:uppercase;margin-bottom:8px;font-family:'Inter',sans-serif}
+  .post{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:6px}
+  .post .time{color:var(--accent2);font-weight:700;font-size:11px}
+  .post .type{color:var(--muted);font-size:10px;text-transform:uppercase}
+  .post.confirmed{border-color:var(--ok)}
+  .post .actions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .tick{color:var(--ok);font-weight:700;font-size:11px}
+  @media(max-width:900px){.cal{grid-template-columns:repeat(2,1fr)}}
+  .price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .tier{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:24px;position:relative;box-shadow:0 8px 28px rgba(28,26,23,.06)}
+  .tier.popular{border-color:var(--accent);box-shadow:0 4px 16px rgba(203,53,46,.12)}
+  .tier.current{border-color:var(--ok)}
+  .tier .pop{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:3px 14px;border-radius:12px;white-space:nowrap}
+  .tier .pop.cur{background:var(--ok)}
+  .tier h3{font-size:22px;font-weight:600}.tier .price{font-size:32px;font-weight:800;margin:10px 0;font-family:'Inter',sans-serif}
+  .tier .price small{font-size:13px;color:var(--muted);font-weight:400}
+  .tier ul{list-style:none;margin:14px 0}
+  .tier li{padding:6px 0;font-size:13px;color:var(--muted)}
+  .tier li::before{content:"✓ ";color:var(--accent);font-weight:700}
+  .toast{position:fixed;bottom:24px;right:24px;max-width:420px;background:#fff;border:1px solid var(--accent);color:var(--text);padding:14px 20px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:99;box-shadow:0 8px 24px rgba(28,26,23,.15)}
+  .toast.show{opacity:1}
+  .signal{display:flex;gap:8px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .signal b{color:var(--text)}
+  .modal-bg{position:fixed;inset:0;background:rgba(28,26,23,.45);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:22px;padding:26px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(28,26,23,.3)}
+  .modal h3{font-size:24px;margin-bottom:6px}
+  .modal .sub{margin-bottom:14px}
+  pre.po{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px;white-space:pre-wrap;font-family:'Inter',monospace;line-height:1.6;margin:10px 0}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cap-note{background:#cb352e0d;border:1px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent2);margin-bottom:14px;display:none}
+  .cap-note.show{display:block}
+  .pool-item{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px}
+  /* flvs. wordmark (recreated from brand logo) */
+  .flvslogo{font-family:'Inter',sans-serif;font-weight:800;font-style:italic;letter-spacing:-.05em;line-height:1;display:inline-flex;align-items:baseline;color:#1c1a17}
+  .flvslogo .co{font-style:normal;font-weight:800;font-size:.24em;letter-spacing:.02em;background:#1c1a17;color:#fff;border-radius:999px;padding:.5em .55em;margin-left:.22em;transform:translateY(.05em)}
+  .flvslogo.inv{color:#fff}.flvslogo.inv .co{background:#fff;color:var(--accent)}
+  /* auth screens */
+  #authWrap{position:fixed;inset:0;z-index:60;display:none;overflow-y:auto;background:var(--bg)}
+  #authWrap.show{display:block}
+  .login-screen{min-height:100%;background:#cb352e;background-image:radial-gradient(circle at 30% 18%,#d8453d 0%,#cb352e 55%,#a82b25 100%);display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{width:100%;max-width:400px;text-align:center}
+  .login-card .panel{text-align:left;margin-top:26px;box-shadow:0 24px 60px rgba(0,0,0,.25);background:#fff;backdrop-filter:none}
+  .wizard{min-height:100%;padding:40px 20px}
+  .wiz-box{max-width:660px;margin:0 auto}
+  .steps{display:flex;gap:6px;margin:16px 0 22px}
+  .steps i{height:4px;flex:1;background:var(--border);border-radius:2px}
+  .steps i.on{background:var(--accent)}
+  .tos{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;font-size:12.5px;line-height:1.7;max-height:270px;overflow-y:auto;color:#4b463f}
+  .tos h4{margin:12px 0 4px;font-family:'Inter',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent2)}
+  .tos h4:first-child{margin-top:0}
+  .plan-pick{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;background:#fff}
+  .plan-pick.sel{border-color:var(--accent);box-shadow:0 2px 12px rgba(203,53,46,.14)}
+  .plan-pick b{font-size:15px}
+  footer{border-top:1px solid var(--border);margin-top:20px;padding:22px 0;overflow:hidden;white-space:nowrap}
+  .ticker{display:inline-block;padding-left:100%;animation:ticker 26s linear infinite;font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+</style>
+</head>
+<body>
+
+<!-- AUTH: login + subscribe wizard -->
+<div id="authWrap">
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="flvslogo inv" style="font-size:88px">flvs<span class="co">co</span></div>
+      <div style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:21px;letter-spacing:1.5px;margin-top:12px">the bran system · Automate the Life.</div>
+      <div class="panel">
+        <div class="field"><label>Email</label><input id="lEmail" placeholder="you@yourbrand.com"></div>
+        <div class="field"><label>Password</label><input id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn" style="width:100%" onclick="doLogin()">Sign in to your backoffice</button>
+        <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">New brand? <u style="cursor:pointer;color:var(--accent);font-weight:600" onclick="startWizard()">Start your subscription →</u></div>
+      </div>
+      <div style="color:#ffffffbb;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:20px">Made in Trinidad & Tobago 🇹🇹</div>
+    </div>
+  </div>
+  <div class="wizard" id="wizardScreen" style="display:none"><div class="wiz-box" id="wizBox"></div></div>
+</div>
+
+<header id="appHeader">
+  <div>
+    <div class="flex" style="gap:10px;align-items:baseline">
+      <span class="flvslogo" style="font-size:30px">flvs<span class="co">co</span></span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--accent);letter-spacing:1px">bran</span>
+    </div>
+    <div class="tagline">Automate the life. <span id="brandLabel" style="color:var(--accent)"></span></div>
+  </div>
+  <div class="flex">
+    <span class="plan-badge" id="planBadge" onclick="showTab('pricing')">Hustle · Demo</span>
+    <button class="btn ghost small" onclick="signOut()">Sign out</button>
+    <button class="btn ghost small" onclick="resetDemo()">Reset demo</button>
+  </div>
+</header>
+<nav id="nav">
+  <button data-tab="connect">Connect Store</button>
+  <button data-tab="store">My Store</button>
+  <button class="active" data-tab="restock">Restock AI</button>
+  <button data-tab="orders">Orders & Delivery</button>
+  <button data-tab="chatbot">DM Chatbot</button>
+  <button data-tab="scheduler">Post Scheduler</button>
+  <button data-tab="automations">Automations</button>
+  <button data-tab="pricing">Plans</button>
+</nav>
+<main>
+
+<!-- CONNECT -->
+<section class="tab" id="connect">
+  <h2>Connect Your Store</h2>
+  <p class="sub">Connect whatever you already sell on — or activate DM-Commerce and sell with no website at all. Connections persist in this demo.</p>
+  <div class="price-grid" id="platformGrid"></div>
+  <div class="panel" style="margin-top:14px">
+    <h3 style="font-size:17px;margin-bottom:6px">Something custom?</h3>
+    <div class="flex" style="flex-wrap:wrap;gap:10px;margin-top:8px">
+      <button class="btn secondary small" onclick="toast('Webhook URL generated: https://app.flvs.life/api/hooks/inbound/'+Math.floor(1000+Math.random()*9000)+' — point your site\'s order/stock events here.')">Generate webhook URL</button>
+      <button class="btn secondary small" onclick="toast('CSV template ready: columns sku, name, stock, price, sold_14d. Upload exports any time as a manual sync.')">CSV sync template</button>
+    </div>
+  </div>
+</section>
+
+<!-- MY STORE -->
+<section class="tab" id="store">
+  <h2>My Store</h2>
+  <p class="sub">Everything your public storefront needs: your look, your payment methods, your delivery mode, and your catalog with photos. Customers see this live at shop.flvs.bran/your-handle.</p>
+  <div class="grid2">
+    <div class="panel" style="margin:0">
+      <h3 style="font-size:17px;margin-bottom:10px">Storefront settings</h3>
+      <div class="row2">
+        <div class="field"><label>Store handle (your URL)</label><input id="stHandle"></div>
+        <div class="field"><label>Brand color</label><input id="stColor" type="color" style="height:38px;padding:3px"></div>
+      </div>
+      <div class="field"><label>Storefront tagline</label><input id="stTag"></div>
+      <div class="field"><label>Pickup / dispatch address</label><input id="stPickup"></div>
+      <div class="field"><label>Payment methods customers can pick</label>
+        <div class="flex" style="flex-wrap:wrap;gap:8px">
+          <button class="btn small secondary" id="pmCard" onclick="togPm('card')"></button>
+          <button class="btn small secondary" id="pmTransfer" onclick="togPm('transfer')"></button>
+          <button class="btn small secondary" id="pmCod" onclick="togPm('cod')"></button>
+        </div>
+      </div>
+      <div class="field"><label>Delivery mode</label>
+        <select id="stCourier" onchange="setCourier(this.value)">
+          <option value="odeliver">oDeliver — automatic courier + live tracking (Trinidad & Tobago)</option>
+          <option value="manual">Manual — I update order statuses myself (anywhere in the world)</option>
+        </select>
+        <p class="sub" style="text-align:left;margin:6px 0 0;font-size:12px" id="courierNote"></p>
+      </div>
+      <button class="btn" onclick="saveStore()">Save storefront</button>
+    </div>
+    <div class="panel" style="margin:0">
+      <h3 style="font-size:17px;margin-bottom:8px">Catalog uploads</h3>
+      <p class="sub" style="text-align:left;margin-bottom:10px">Add each product once — photo, price, stock. It powers your storefront, the bot's answers, and Restock AI all at the same time.</p>
+      <button class="btn" onclick="openProductModal()">+ Upload a product</button>
+      <div id="storeCatalog" style="margin-top:14px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESTOCK -->
+<section class="tab active" id="restock">
+  <h2>Restock Intelligence</h2>
+  <p class="sub">Verdicts are computed live from your numbers: stock, 14-day sales, DM asks, views, and cart adds. Change anything and watch the verdict move.</p>
+  <div class="cards" id="restockCards"></div>
+  <div class="flex" style="margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn" onclick="openProductModal()">+ Add product</button>
+    <span class="sub" style="margin:0" id="prodCount"></span>
+  </div>
+  <table>
+    <thead><tr><th>Product</th><th>Stock</th><th>Sell-through</th><th>Demand signals</th><th>AI Verdict</th><th>Why</th><th>Actions</th></tr></thead>
+    <tbody id="skuBody"></tbody>
+  </table>
+</section>
+
+<!-- ORDERS -->
+<section class="tab" id="orders">
+  <h2>Orders & Delivery Pipeline</h2>
+  <p class="sub">Create an order, dispatch it to the courier, and step it through pickup → delivery. Delivered orders feed sales history and Restock AI.</p>
+  <div class="cards" id="orderCards"></div>
+  <div class="panel" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div>
+      <h3 style="font-size:16px">Auto-dispatch to oDeliver</h3>
+      <p class="sub" style="margin:4px 0 0">On: new orders book the courier instantly. Off: you approve each booking.</p>
+    </div>
+    <div class="flex">
+      <button class="btn" onclick="openOrderModal()">+ New order</button>
+      <button class="btn small secondary" id="autoDispatch" onclick="togDispatch()"></button>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Delivery</th><th>Status</th><th>Tracking</th><th>Actions</th></tr></thead>
+    <tbody id="orderBody"></tbody>
+  </table>
+  <div class="panel" style="margin-top:20px">
+    <h3 style="font-size:16px;margin-bottom:6px">Phase 2 — FLVS In-House Delivery</h3>
+    <p class="sub" style="margin:0">Built courier-agnostic: when your own fleet launches, it swaps in behind this same pipeline — your drivers, your tracking page, delivery profit in-house.</p>
+  </div>
+</section>
+
+<!-- CHATBOT -->
+<section class="tab" id="chatbot">
+  <h2>DM Chatbot — trained on your voice</h2>
+  <p class="sub">Paste real DM exchanges and the bot actually learns them — try training it, then ask it the same question in the chat. It also reads live stock and prices from your catalog.</p>
+  <div class="cap-note" id="capNote"></div>
+  <div class="grid2">
+    <div class="panel">
+      <h3 style="margin-bottom:8px">1 · Train it</h3>
+      <p class="sub" style="margin-bottom:8px">Format: lines starting with <b>Customer:</b> then <b>You:</b>. Each pair becomes a learned response.</p>
+      <textarea id="trainBox" placeholder="Customer: yuh does do custom orders?
+You: Yeah fam we do customs! DM we di design an we quote yuh in 24hrs 🔥"></textarea>
+      <div style="margin-top:10px" class="flex">
+        <button class="btn" onclick="train()">Add to training set</button>
+        <span class="sub" style="margin:0" id="trainCount"></span>
+      </div>
+      <div style="margin-top:12px" id="trainedList"></div>
+    </div>
+    <div class="panel" style="padding:0">
+      <div style="padding:16px 16px 0"><h3>2 · Test it live</h3><p class="sub">Ask about price, stock, shipping, sizing — or anything you just trained.</p></div>
+      <div class="chat">
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input">
+          <input id="chatIn" placeholder="Try: 'how much fah di miniKINI'" onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3 style="font-size:16px;margin-bottom:6px">Escalations</h3>
+    <p class="sub" style="margin-bottom:8px">Refund disputes, wholesale asks, and low-confidence replies go to you. Logged here:</p>
+    <div id="escList" class="sub" style="margin:0">None yet.</div>
+  </div>
+</section>
+
+<!-- SCHEDULER -->
+<section class="tab" id="scheduler">
+  <h2>AI Post Scheduler</h2>
+  <p class="sub">Add content to the pool, hit "Plan my week" and the AI fills the best slots from your IG data. You confirm, reslot, or pull posts back.</p>
+  <div class="cards" id="schedCards"></div>
+  <div class="grid2" style="margin-bottom:20px">
+    <div class="panel" style="margin:0">
+      <h3 style="font-size:17px;margin-bottom:8px">Content pool</h3>
+      <div class="row2" style="margin-bottom:10px">
+        <div><label>Name</label><input id="poolName" placeholder="e.g. Flame Kini beach shoot"></div>
+        <div><label>Type</label><select id="poolType"><option>Reel</option><option>Photo</option><option>Story</option></select></div>
+      </div>
+      <button class="btn small" onclick="addPool()">Add to pool</button>
+      <div style="margin-top:12px" id="poolList"></div>
+    </div>
+    <div class="panel" style="margin:0">
+      <h3 style="font-size:17px;margin-bottom:8px">Your IG data (drives the slots)</h3>
+      <p class="sub" style="margin-bottom:8px">Audience peak <b>7–9 PM AST</b> · Reels reach <b>2.7×</b> photos · UGC +64% Sat morning · Story polls best at lunch.</p>
+      <button class="btn" onclick="planWeek()">✨ Plan my week</button>
+      <button class="btn small ghost" onclick="clearWeek()" style="margin-left:8px">Clear unconfirmed</button>
+    </div>
+  </div>
+  <div class="cal" id="cal"></div>
+</section>
+
+<!-- AUTOMATIONS -->
+<section class="tab" id="automations">
+  <h2>Back-end Automations</h2>
+  <p class="sub">The rule of the Ladder: <b>Hustle gets the alerts</b> (the system tells you about the money), <b>Pro gets the actions</b> (it recovers the money), <b>Empire gets the campaigns</b> (it grows the money on its own). Switch plans to watch locks open.</p>
+  <div style="margin-bottom:16px"><button class="btn" onclick="bossReport()">Generate Boss Report now</button></div>
+  <div class="grid2" id="autoGrid"></div>
+</section>
+
+<!-- PRICING -->
+<section class="tab" id="pricing">
+  <h2>The Ladder</h2>
+  <p class="sub">Every tier has every feature — you buy how much runs without you. No charge over US$50 (TT debit daily limit). Switch plans below: caps take effect immediately in this demo.</p>
+  <div class="price-grid" id="tierGrid"></div>
+  <div class="panel" style="margin-top:20px;border-color:var(--accent)">
+    <h3 style="font-size:17px;margin-bottom:6px">What your tier left on the table</h3>
+    <p class="sub" style="margin-bottom:10px">Live from your demo data — this is the upgrade engine.</p>
+    <div class="signal" style="font-size:13px;gap:10px;flex-direction:column;align-items:flex-start" id="tableLeft"></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="ticker">Automate the Life ✦ Made for Caribbean Brands 🇹🇹 ✦ Restock Smarter ✦ Answer Every DM ✦ Automate the Life ✦ Made for Caribbean Brands 🇹🇹 ✦ Restock Smarter ✦ Answer Every DM ✦</div></footer>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalBox"></div></div>
+
+<script>
+/* ============ STATE ============ */
+const DEFAULTS = {
+  account:null,
+  store:{handle:'flvs',color:'#cb352e',tag:'Handmade swimwear from Trinidad & Tobago 🇹🇹',pickup:'FLVS Studio, Woodbrook, POS',pm:{card:true,transfer:false,cod:true},courier:'odeliver'},
+  plan:'hustle',
+  platforms:{'Shopify':false,'WooCommerce':false,'Squarespace':false,'Wix':false,'Custom-built site':true,'DM-Commerce':false},
+  autoDispatch:false,
+  products:[
+    {id:1,name:'DBL.BLK Steam Mono II',stock:8,price:600,sold14:22,dm:34,views:940,carts:21},
+    {id:2,name:'miniKINI',stock:5,price:300,sold14:18,dm:41,views:1240,carts:28},
+    {id:3,name:'Flame Tringl Kini',stock:12,price:300,sold14:15,dm:19,views:610,carts:12},
+    {id:4,name:'Brazil Kini',stock:30,price:280,sold14:7,dm:6,views:290,carts:4},
+    {id:5,name:'Camo Tringl Kini',stock:38,price:300,sold14:3,dm:2,views:120,carts:1}
+  ],
+  nextProdId:6, nextOrderNum:1048,
+  orders:[
+    {id:'#1045',cust:'Shania R.',area:'Port of Spain',items:'Flame Tringl Kini',svc:'Hub & Spoke (1-2d)',cod:false,status:1,track:'OD-7X9K2M4P'},
+    {id:'#1044',cust:'Marcus T.',area:'Arima',items:'miniKINI',svc:'Instant (same-day)',cod:true,status:2,track:'OD-A3B5C7D9'},
+    {id:'#1042',cust:'Jelani P.',area:'Tobago',items:'Steam Mono II',svc:'Hub & Spoke (1-2d)',cod:false,status:3,track:'OD-M1P3R5T7'}
+  ],
+  trained:[
+    {q:'how much fah di minikini price cost',a:'Di miniKINI going fah TT$300 fam 🔥 Bundle it wid di Flame Kini an we knock off 10%. Want di linky?'},
+    {q:'shipping deliver trinidad tobago reach',a:'We deliver whole Trinidad an Tobago ✈️ POS reach same-day wid Instant, everywhere else 1-2 days. Free delivery over TT$500!'}
+  ],
+  botReplies:287, escalations:[],
+  pool:[{id:1,name:'Steam Mono BTS shoot',type:'Reel'},{id:2,name:'Customer repost (San Fdo)',type:'Photo'},{id:3,name:'New drop teaser poll',type:'Story'},{id:4,name:'Maracas golden hour set',type:'Reel'}],
+  nextPoolId:5, postsUsed:6,
+  week:[{d:'Mon',posts:[]},{d:'Tue',posts:[]},{d:'Wed',posts:[]},{d:'Thu',posts:[]},{d:'Fri',posts:[]},{d:'Sat',posts:[]},{d:'Sun',posts:[]}],
+  autos:{'Abandoned Cart Rescue':true,'Drop Hype Detector':true,'Supplier Auto-PO':false,'Customer Segments & Win-back':false,'Weekly Boss Report':true,'Price & Promo Advisor':false,'Review & UGC Collector':false,'Fraud & Chargeback Shield':false}
+};
+let S;
+function load(){ try{ const raw=localStorage.getItem('flvsbran'); S=raw?JSON.parse(raw):JSON.parse(JSON.stringify(DEFAULTS)); }catch(e){ S=JSON.parse(JSON.stringify(DEFAULTS)); }
+  if(!S.store)S.store=JSON.parse(JSON.stringify(DEFAULTS.store)); }
+function save(){ try{ localStorage.setItem('flvsbran',JSON.stringify(S)); }catch(e){} }
+function resetDemo(){ try{localStorage.removeItem('flvsbran');}catch(e){} load(); renderAll(); toast('Demo reset to starting data.'); }
+
+const PLANS={
+  hustle:{label:'Hustle',price:'$50 US/mo',tag:'"The system works. You still press the buttons."',replyCap:300,postCap:10,autoPO:false,autoDispatchAllowed:false,
+    feats:['Full DM-Commerce mode — sell with no website','Chatbot in your voice · 300 replies/mo','Restock verdicts (you place supplier orders)','10 AI-scheduled posts/mo · one-tap courier booking','Alert automations: Boss Report + Drop Hype Detector']},
+  pro:{label:'Pro',price:'$25 US/wk',tag:'"The system runs. You approve."',replyCap:Infinity,postCap:Infinity,autoPO:true,autoDispatchAllowed:true,
+    feats:['Unlimited chatbot replies — never goes quiet','Unlimited scheduled posts + auto-dispatch','Action automations: Cart Rescue, Auto-PO, Promo Advisor','Everything in Hustle, uncapped','The tier the product is designed around']},
+  empire:{label:'Empire',price:'$50 US/wk',tag:'"The brand runs itself. You check the report."',replyCap:Infinity,postCap:Infinity,autoPO:true,autoDispatchAllowed:true,
+    feats:['Campaign automations: Win-back, UGC Collector, Fraud Shield','Everything fully automatic — orders, POs, dispatch','Multi-brand / multi-account','Priority support + white-glove onboarding','First access to new automations']}
+};
+
+/* ============ HELPERS ============ */
+function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3400)}
+function modal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modalBg').classList.add('show')}
+function closeModal(){document.getElementById('modalBg').classList.remove('show')}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showTab(id){document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id===id))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ============ RESTOCK ============ */
+const LEAD=21;
+function analyze(p){
+  const daily=p.sold14/14;
+  const days=daily>0?p.stock/daily:99;
+  const demand=p.dm*3+p.carts*4+p.views*0.05;
+  const st=p.sold14+p.stock>0?Math.round(100*p.sold14/(p.sold14+p.stock)):0;
+  let v,qty=0,why;
+  if(daily>0.5&&days<LEAD+7){v='REORDER';qty=Math.max(5,Math.ceil(daily*(LEAD+30)-p.stock));
+    why=`~${days.toFixed(0)} days of stock left at ${daily.toFixed(1)} sales/day — under the ${LEAD}-day supplier lead time. ${p.dm} DM asks + ${p.carts} carts say demand is live.`;}
+  else if(days>35||demand<25){v='HOLD';
+    why=`${days>90?'90+':Math.round(days)} days of stock at current pace and weak signals (${p.dm} DMs, ${p.carts} carts). Reordering ties up ~TT$${(p.stock*p.price*0.4).toFixed(0)} in cash. Try a promo instead.`;}
+  else {v='WATCH';
+    why=`Moderate pace — ${Math.round(days)} days of cover. Signals ${demand>80?'rising':'steady'}; re-checking daily.`;}
+  return {v,qty,why,st,days,demand};
+}
+function renderRestock(){
+  const P=S.products;
+  const rev=S.products.reduce((a,p)=>a+p.sold14*p.price,0);
+  const risk=P.filter(p=>analyze(p).v==='REORDER').length;
+  const dmTotal=P.reduce((a,p)=>a+p.dm,0);
+  const held=P.filter(p=>analyze(p).v==='HOLD').reduce((a,p)=>a+p.stock*p.price*0.4,0);
+  document.getElementById('restockCards').innerHTML=`
+   <div class="card"><div class="label">Revenue (14d)</div><div class="value">TT$${rev.toLocaleString()}</div><div class="delta up">from ${P.reduce((a,p)=>a+p.sold14,0)} units sold</div></div>
+   <div class="card"><div class="label">SKUs to reorder</div><div class="value">${risk}</div><div class="delta ${risk?'down':'up'}">${risk?'action needed':'all covered'}</div></div>
+   <div class="card"><div class="label">DM product asks</div><div class="value">${dmTotal}</div><div class="delta">across catalog</div></div>
+   <div class="card"><div class="label">Cash in slow stock</div><div class="value">TT$${held.toFixed(0)}</div><div class="delta">${P.filter(p=>analyze(p).v==='HOLD').length} SKUs on HOLD</div></div>`;
+  document.getElementById('prodCount').textContent=P.length+' products in catalog';
+  const bc=v=>({REORDER:'b-reorder',HOLD:'b-hold',WATCH:'b-watch'})[v];
+  document.getElementById('skuBody').innerHTML=P.map(p=>{const a=analyze(p);return `
+   <tr>
+    <td><b>${esc(p.name)}</b><div class="sub" style="margin:2px 0 0;font-size:11px">TT$${p.price}</div></td>
+    <td>${p.stock<10?`<span class="badge b-low">${p.stock} left</span>`:p.stock+' units'}</td>
+    <td><span class="bar"><i style="width:${a.st}%;background:${a.st>65?'var(--accent)':a.st>35?'var(--warn)':'var(--hold)'}"></i></span> ${a.st}%</td>
+    <td><div class="signal"><span>💬 <b>${p.dm}</b></span><span>👀 <b>${p.views}</b></span><span>🛒 <b>${p.carts}</b></span></div></td>
+    <td><span class="badge ${bc(a.v)}">${a.v}${a.qty?' +'+a.qty:''}</span></td>
+    <td class="reason">${a.why}</td>
+    <td><div class="flex" style="gap:6px;flex-wrap:wrap">
+      ${a.v==='REORDER'?`<button class="btn small" onclick="draftPO(${p.id})">Draft PO</button>`:''}
+      <button class="btn small ghost" onclick="editProduct(${p.id})">Edit</button>
+      <button class="btn small ghost" onclick="recordSale(${p.id})">+ Sale</button>
+    </div></td>
+   </tr>`}).join('');
+  save();
+}
+let _pendingImg=null;
+function grabImg(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{_pendingImg=e.target.result;document.getElementById('imgPrev').innerHTML=`<img src="${_pendingImg}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--border)">`};r.readAsDataURL(f)}
+function openProductModal(ed){
+  const p=ed?S.products.find(x=>x.id===ed):{name:'',stock:10,price:300,sold14:0,dm:0,views:0,carts:0};
+  _pendingImg=p.img||null;
+  modal(`<h3>${ed?'Edit':'Upload'} product</h3><p class="sub">Photo + numbers — this feeds your storefront, the bot, and Restock AI.</p>
+   <div class="field"><label>Product photo</label>
+    <div class="flex"><input type="file" accept="image/*" onchange="grabImg(this)" style="padding:6px">
+    <span id="imgPrev">${p.img?`<img src="${p.img}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--border)">`:''}</span></div></div>
+   <div class="field"><label>Name</label><input id="mName" value="${esc(p.name)}"></div>
+   <div class="row2"><div class="field"><label>Stock (units)</label><input id="mStock" type="number" value="${p.stock}"></div>
+   <div class="field"><label>Price (TT$)</label><input id="mPrice" type="number" value="${p.price}"></div></div>
+   <div class="row2"><div class="field"><label>Sold last 14 days</label><input id="mSold" type="number" value="${p.sold14}"></div>
+   <div class="field"><label>DM asks (7d)</label><input id="mDm" type="number" value="${p.dm}"></div></div>
+   <div class="row2"><div class="field"><label>Page views (7d)</label><input id="mViews" type="number" value="${p.views}"></div>
+   <div class="field"><label>Cart adds (7d)</label><input id="mCarts" type="number" value="${p.carts}"></div></div>
+   <div class="flex"><button class="btn" onclick="saveProduct(${ed||0})">Save</button>
+   ${ed?`<button class="btn small ghost" onclick="delProduct(${ed})">Delete</button>`:''}
+   <button class="btn ghost small" onclick="closeModal()">Cancel</button></div>`);
+}
+function editProduct(id){openProductModal(id)}
+function saveProduct(id){
+  const g=i=>document.getElementById(i).value;
+  const vals={name:g('mName')||'Untitled',stock:+g('mStock')||0,price:+g('mPrice')||0,sold14:+g('mSold')||0,dm:+g('mDm')||0,views:+g('mViews')||0,carts:+g('mCarts')||0};
+  if(_pendingImg)vals.img=_pendingImg;
+  if(id){Object.assign(S.products.find(x=>x.id===id),vals)}else{S.products.push({id:S.nextProdId++,...vals})}
+  closeModal();renderRestock();renderOrders();renderPlans();renderStore();toast('Catalog updated — storefront, bot, and Restock AI all see it now.');
+}
+function delProduct(id){S.products=S.products.filter(p=>p.id!==id);closeModal();renderRestock();toast('Product removed.')}
+function recordSale(id){const p=S.products.find(x=>x.id===id);if(p.stock<1){toast('Out of stock — record a restock via Edit.');return}
+ p.stock--;p.sold14++;renderRestock();renderPlans();toast(`Sale recorded: ${esc(p.name)} — stock now ${p.stock}.`)}
+function draftPO(id){
+  const p=S.products.find(x=>x.id===id),a=analyze(p);
+  const auto=PLANS[S.plan].autoPO;
+  const body=`To: supplier@yourfactory.com\nSubject: Purchase Order — ${p.name}\n\nHi,\n\nPlease produce and ship:\n\n  ${p.name}  ×  ${a.qty} units\n  Target unit cost: TT$${(p.price*0.4).toFixed(0)} (as per last order)\n  Needed by: ${LEAD} days\n\nDeliver to: FLVS point of sale, Trinidad.\n\nThanks,\nFLVS`;
+  modal(`<h3>Purchase order — ${esc(p.name)}</h3>
+   <p class="sub">${auto?'Drafted automatically by Restock AI. One tap to send.':'On Hustle you review and send this yourself — <b>Pro drafts and sends it in one tap.</b>'}</p>
+   <pre class="po">${esc(body)}</pre>
+   <div class="flex"><button class="btn" onclick="closeModal();toast('PO for ${a.qty}× ${esc(p.name)} sent to supplier ✓')">${auto?'Approve & send':'Mark as sent'}</button>
+   <button class="btn ghost small" onclick="closeModal()">Close</button></div>`);
+}
+
+/* ============ MY STORE ============ */
+function togPm(k){S.store.pm[k]=!S.store.pm[k];renderStore();save()}
+function setCourier(v){S.store.courier=v;renderStore();renderOrders();save()}
+function saveStore(){
+  S.store.handle=document.getElementById('stHandle').value.trim()||S.store.handle;
+  S.store.color=document.getElementById('stColor').value;
+  S.store.tag=document.getElementById('stTag').value;
+  S.store.pickup=document.getElementById('stPickup').value;
+  renderStore();toast('Storefront saved — live at <b>shop.flvs.bran/'+esc(S.store.handle)+'</b>');
+}
+function renderStore(){
+  if(!document.getElementById('stHandle'))return;
+  document.getElementById('stHandle').value=S.store.handle;
+  document.getElementById('stColor').value=S.store.color;
+  document.getElementById('stTag').value=S.store.tag;
+  document.getElementById('stPickup').value=S.store.pickup;
+  const pm=S.store.pm;
+  const set=(id,on,label)=>{const b=document.getElementById(id);b.textContent=(on?'✓ ':'')+label;b.className='btn small '+(on?'':'secondary')};
+  set('pmCard',pm.card,'Card / payment link');set('pmTransfer',pm.transfer,'Bank transfer');set('pmCod',pm.cod,'Cash on delivery');
+  document.getElementById('stCourier').value=S.store.courier;
+  document.getElementById('courierNote').innerHTML=S.store.courier==='odeliver'
+    ?'Orders auto-book the courier; your customer\'s tracking page updates itself from oDeliver.'
+    :'For brands outside T&T (or using their own delivery): you tap <b>Packed → Shipped → Delivered</b> on each order, and your customer\'s tracking page updates instantly — same branded experience, you\'re the data source.';
+  document.getElementById('storeCatalog').innerHTML=S.products.map(p=>`
+   <div class="pool-item">
+    <span class="flex" style="gap:10px">${p.img?`<img src="${p.img}" style="width:40px;height:40px;object-fit:cover;border-radius:8px">`:'<span style="font-size:22px">🛍️</span>'}
+     <span><b>${esc(p.name)}</b><br><span style="font-size:11px;color:var(--muted)">TT$${p.price} · ${p.stock} in stock</span></span></span>
+    <button class="btn small ghost" onclick="editProduct(${p.id})">Edit</button>
+   </div>`).join('')||'<span class="sub">No products yet — upload your first.</span>';
+}
+
+/* ============ ORDERS ============ */
+function STATUSES(){return S.store.courier==='manual'
+  ?['New order','Packed','Shipped','Delivered ✓']
+  :['New order','Awaiting pickup','Out for delivery','Delivered ✓']}
+function stBadge(s){return ['b-watch','b-low','b-reorder','b-ok'][s]}
+function renderOrders(){
+  const O=S.orders;
+  document.getElementById('orderCards').innerHTML=`
+   <div class="card"><div class="label">Open orders</div><div class="value">${O.filter(o=>o.status<3).length}</div><div class="delta">${O.length} total in demo</div></div>
+   <div class="card"><div class="label">${STATUSES()[1]}</div><div class="value">${O.filter(o=>o.status===1).length}</div><div class="delta">${S.store.courier==='manual'?'your updates':'courier booked'}</div></div>
+   <div class="card"><div class="label">${STATUSES()[2]}</div><div class="value">${O.filter(o=>o.status===2).length}</div><div class="delta up">on time</div></div>
+   <div class="card"><div class="label">Delivered</div><div class="value">${O.filter(o=>o.status===3).length}</div><div class="delta up">feeds sales history</div></div>`;
+  const btn=document.getElementById('autoDispatch');
+  btn.textContent='Auto-dispatch: '+(S.autoDispatch?'ON':'OFF');btn.className='btn small '+(S.autoDispatch?'':'secondary');
+  document.getElementById('orderBody').innerHTML=O.map((o,i)=>`
+   <tr><td><b>${o.id}</b>${o.cod?'<div class="sub" style="font-size:10px;margin:2px 0 0">CASH ON DELIVERY</div>':''}</td>
+    <td>${esc(o.cust)} — ${esc(o.area)}</td><td>${esc(o.items)}</td>
+    <td style="font-size:12px;color:var(--muted)">${o.svc}</td>
+    <td><span class="badge ${stBadge(o.status)}">${STATUSES()[o.status]}</span></td>
+    <td style="font-size:12px">${o.track||'—'}</td>
+    <td><div class="flex" style="gap:6px;flex-wrap:wrap">
+     ${o.status===0?`<button class="btn small" onclick="dispatchOrder(${i})">${S.store.courier==='manual'?'Mark packed →':'Send to courier'}</button>`:''}
+     ${o.status===1||o.status===2?`<button class="btn small secondary" onclick="advanceOrder(${i})">${STATUSES()[o.status+1].replace(' ✓','')} →</button>`:''}
+     ${o.status===3?'<span class="tick">Complete</span>':''}
+    </div></td></tr>`).join('');
+  save();
+}
+function openOrderModal(){
+  const opts=S.products.filter(p=>p.stock>0).map(p=>`<option value="${p.id}">${esc(p.name)} (TT$${p.price} · ${p.stock} left)</option>`).join('');
+  if(!opts){toast('No products in stock — add stock first.');return}
+  modal(`<h3>New order</h3><p class="sub">Simulates an order landing from your site, DMs, or checkout.</p>
+   <div class="row2"><div class="field"><label>Customer</label><input id="oCust" placeholder="e.g. Keisha M."></div>
+   <div class="field"><label>Area</label><input id="oArea" placeholder="e.g. San Fernando"></div></div>
+   <div class="field"><label>Product</label><select id="oProd">${opts}</select></div>
+   <div class="row2"><div class="field"><label>Service</label><select id="oSvc"><option>Hub & Spoke (1-2d)</option><option>Instant (same-day)</option></select></div>
+   <div class="field"><label>Payment</label><select id="oCod"><option value="0">Paid online</option><option value="1">Cash on delivery</option></select></div></div>
+   <div class="flex"><button class="btn" onclick="createOrder()">Create order</button><button class="btn ghost small" onclick="closeModal()">Cancel</button></div>`);
+}
+function createOrder(){
+  const p=S.products.find(x=>x.id===+document.getElementById('oProd').value);
+  p.stock--; p.dm+=1; p.carts+=1;
+  const o={id:'#'+(S.nextOrderNum++),cust:document.getElementById('oCust').value||'Customer',area:document.getElementById('oArea').value||'Trinidad',
+   items:p.name,svc:document.getElementById('oSvc').value,cod:document.getElementById('oCod').value==='1',status:0,track:''};
+  S.orders.unshift(o);closeModal();
+  if(S.autoDispatch&&PLANS[S.plan].autoDispatchAllowed){dispatchOrder(0,true)}
+  else{renderOrders();renderRestock();toast(`Order ${o.id} created${S.autoDispatch&&!PLANS[S.plan].autoDispatchAllowed?' — <b>auto-dispatch needs Pro</b>, book the courier manually':' — send to courier when packed'}.`)}
+}
+function dispatchOrder(i,silent){
+  const o=S.orders[i];o.status=1;
+  if(S.store.courier==='manual'){
+    o.track='TRK-'+Math.random().toString(36).slice(2,10).toUpperCase();
+    toast(`${o.id} marked <b>Packed</b> — customer's tracking page (${o.track}) updated instantly. Tap through Shipped → Delivered as you go.`);
+  }else{
+    o.track='OD-'+Math.random().toString(36).slice(2,10).toUpperCase();
+    toast(`${o.id} → oDeliver: estimate TT$${o.svc.includes('Instant')?45:38}, pickup booked at point of sale, label generated${o.cod?', driver collects cash':''}. Tracking ${o.track}. Customer notified.`);
+  }
+  renderOrders();renderRestock();
+}
+function advanceOrder(i){
+  const o=S.orders[i];o.status++;
+  if(o.status===3){const p=S.products.find(x=>x.name===o.items);if(p){p.sold14++} toast(`${o.id} delivered ✓ — sale logged to Restock AI.`)}
+  else toast(S.store.courier==='manual'?`${o.track}: marked <b>${STATUSES()[o.status]}</b> — customer sees it live on their tracking page.`:`${o.track}: courier picked up, out for delivery.`);
+  renderOrders();renderRestock();renderPlans();
+}
+function togDispatch(){
+  if(!PLANS[S.plan].autoDispatchAllowed&&!S.autoDispatch){toast('Auto-dispatch is a <b>Pro</b> feature — on Hustle you book each courier with one tap. <u onclick="showTab(\'pricing\')" style="cursor:pointer">See the Ladder</u>');return}
+  S.autoDispatch=!S.autoDispatch;renderOrders();toast('Auto-dispatch '+(S.autoDispatch?'on — new orders book the courier instantly.':'off.'));
+}
+
+/* ============ CHATBOT ============ */
+function tokens(s){return s.toLowerCase().replace(/[^a-z0-9$ ]/g,' ').split(/\s+/).filter(w=>w.length>2)}
+function addMsg(who,text,tag){const log=document.getElementById('chatLog');
+ log.innerHTML+=`<div class="msg ${who}">${text}${tag?`<span class="tag">${tag}</span>`:''}</div>`;log.scrollTop=log.scrollHeight}
+function renderBot(){
+  const cap=PLANS[S.plan].replyCap;
+  document.getElementById('trainCount').textContent=S.trained.length+' learned responses';
+  document.getElementById('trainedList').innerHTML=S.trained.map((t,i)=>
+   `<div class="pool-item"><span style="max-width:85%">"${esc(t.q.slice(0,60))}${t.q.length>60?'…':''}"</span><button class="btn small ghost" onclick="S.trained.splice(${i},1);renderBot();save()">×</button></div>`).join('')||'<span class="sub">Nothing trained yet.</span>';
+  const n=document.getElementById('capNote');
+  if(cap!==Infinity){n.classList.add('show');n.innerHTML=`<b>${S.botReplies} / ${cap}</b> replies used this month on Hustle. ${S.botReplies>=cap?'<b>The bot has gone quiet — customers are waiting.</b>':'When the cap hits, the bot goes quiet.'} Pro is unlimited.`}
+  else n.classList.remove('show');
+  document.getElementById('escList').innerHTML=S.escalations.length?S.escalations.map(e=>`• ${esc(e)}`).join('<br>'):'None yet.';
+  save();
+}
+function train(){
+  const v=document.getElementById('trainBox').value;
+  const re=/customer:\s*([\s\S]*?)you:\s*([\s\S]*?)(?=customer:|$)/gi;let m,c=0;
+  while((m=re.exec(v))!==null){const q=m[1].trim(),a=m[2].trim();if(q&&a){S.trained.push({q:tokens(q).join(' '),a});c++}}
+  if(!c){toast('Format each pair as "Customer: …" then "You: …"');return}
+  document.getElementById('trainBox').value='';renderBot();
+  toast(`${c} exchange${c>1?'s':''} learned — ask the bot the same thing to see it answer in your voice.`);
+}
+const CANNED=[
+ {k:['price','much','cost','fah'],fn:()=>{const p=S.products[Math.floor(Math.random()*Math.min(2,S.products.length))];return `Di ${p.name} going fah TT$${p.price} fam 🔥 Want mi send di linky?`}},
+ {k:['stock','available','left','have'],fn:()=>{const p=S.products.find(x=>x.stock>0)||S.products[0];return p.stock>0?`Yeah we still got di ${p.name} — ${p.stock} left! Want mi hold one fah yuh? 🛒`:`Dat one sell out fam 😩 but restock coming — drop yuh size an mi ping yuh first.`}},
+ {k:['ship','deliver','reach','courier'],fn:()=>'We deliver whole T&T ✈️ POS same-day wid Instant, everywhere else 1-2 days. Cash on delivery available too!'},
+ {k:['size','fit','small','medium','large'],fn:()=>'Dem kinis run true to size 💯 If yuh in between, size up fah comfort. DM yuh measurements an we help yuh pick.'},
+ {k:['hello','gwan','morning','hey'],fn:()=>'Wah gwan! 👋 Welcome to FLVS. New drop just land — wha yuh looking for today?'}
+];
+function botAnswer(q){
+  const qt=tokens(q);
+  let best=null,bs=0;
+  for(const t of S.trained){const tt=t.q.split(' ');const hit=qt.filter(w=>tt.includes(w)).length;const score=hit/Math.max(2,qt.length);if(hit>=2&&score>bs){bs=score;best=t}}
+  if(best)return{a:best.a,tag:'from your training'};
+  if(/refund|return|wrong|wholesale|collab|bulk/.test(q.toLowerCase())){
+    S.escalations.unshift(`"${q.slice(0,50)}" — flagged to owner (${/refund|return|wrong/.test(q.toLowerCase())?'refund/dispute':'wholesale/collab'})`);
+    return{a:'Mi flag dis fah di owner one time — dem handle dis personal an yuh go hear back today 🙏',tag:'escalated to owner'};}
+  const c=CANNED.find(r=>r.k.some(k=>q.toLowerCase().includes(k)));
+  if(c)return{a:c.fn(),tag:'live catalog data'};
+  S.escalations.unshift(`"${q.slice(0,50)}" — low confidence, sent to owner`);
+  return{a:'Mi nah too sure bout dat one — lemme link yuh wid di owner so yuh get di right answer 💬',tag:'escalated · low confidence'};
+}
+function sendChat(){
+  const inp=document.getElementById('chatIn');const v=inp.value.trim();if(!v)return;
+  addMsg('user',esc(v));inp.value='';
+  const cap=PLANS[S.plan].replyCap;
+  if(S.botReplies>=cap){setTimeout(()=>{addMsg('bot','…','bot quiet — reply cap reached on Hustle. Customer left waiting.');renderBot();renderPlans()},500);return}
+  S.botReplies++;
+  const r=botAnswer(v);
+  setTimeout(()=>{addMsg('bot',esc(r.a),r.tag);renderBot();renderPlans()},550);
+}
+
+/* ============ SCHEDULER ============ */
+const SLOTS=[
+ {d:0,t:'7:30 PM',type:'Reel',why:'Reels peak Mon 7-9PM'},
+ {d:4,t:'6:45 PM',type:'Reel',why:'Pre-weekend hype = 2.3× saves'},
+ {d:5,t:'11:00 AM',type:'Photo',why:'UGC/photos +64% Sat morning'},
+ {d:1,t:'12:15 PM',type:'Story',why:'Story polls peak at lunch'},
+ {d:2,t:'8:00 PM',type:'Photo',why:'Midweek engagement bump'},
+ {d:3,t:'7:15 PM',type:'Reel',why:'Secondary reel window'},
+ {d:6,t:'5:00 PM',type:'Story',why:'Sunday wind-down scrollers'}
+];
+function renderSched(){
+  const cap=PLANS[S.plan].postCap;
+  const scheduled=S.week.reduce((a,d)=>a+d.posts.length,0);
+  const pend=S.week.reduce((a,d)=>a+d.posts.filter(p=>!p.confirmed).length,0);
+  document.getElementById('schedCards').innerHTML=`
+   <div class="card"><div class="label">Content in pool</div><div class="value">${S.pool.length}</div><div class="delta">ready to schedule</div></div>
+   <div class="card"><div class="label">Scheduled this week</div><div class="value">${scheduled}</div><div class="delta">${pend} awaiting confirm</div></div>
+   <div class="card"><div class="label">Posts used / cap</div><div class="value">${S.postsUsed}${cap===Infinity?'':' / '+cap}</div><div class="delta ${cap!==Infinity&&S.postsUsed>=cap?'down':''}">${cap===Infinity?'unlimited on '+PLANS[S.plan].label:cap-S.postsUsed+' left this month'}</div></div>
+   <div class="card"><div class="label">Best window</div><div class="value">7–9 PM</div><div class="delta up">audience peak (AST)</div></div>`;
+  document.getElementById('poolList').innerHTML=S.pool.map(p=>
+   `<div class="pool-item"><span>${esc(p.name)} <span class="type" style="color:var(--muted);font-size:10px;text-transform:uppercase">· ${p.type}</span></span>
+    <button class="btn small ghost" onclick="S.pool=S.pool.filter(x=>x.id!==${p.id});renderSched();save()">×</button></div>`).join('')||'<span class="sub">Pool empty — add content above.</span>';
+  document.getElementById('cal').innerHTML=S.week.map((day,di)=>`
+   <div class="day"><h4>${day.d}</h4>
+    ${day.posts.map((p,pi)=>`
+     <div class="post ${p.confirmed?'confirmed':''}">
+      <div class="time">${p.t} <span class="type">· ${p.type}</span></div>
+      <div style="margin:4px 0;font-weight:600">${esc(p.name)}</div>
+      <div style="color:var(--muted);font-size:10px">${p.why}</div>
+      ${p.confirmed?'<div class="tick">✓ Confirmed — will auto-publish</div>':`
+      <div class="actions">
+       <button class="btn small" onclick="confirmPost(${di},${pi})">Confirm</button>
+       <button class="btn small secondary" onclick="reslot(${di},${pi})">Reslot</button>
+       <button class="btn small ghost" onclick="unschedule(${di},${pi})">↩</button>
+      </div>`}
+     </div>`).join('')||'<div style="color:var(--muted);font-size:11px">No post — rest day</div>'}
+   </div>`).join('');
+  save();
+}
+function addPool(){
+  const n=document.getElementById('poolName').value.trim();if(!n){toast('Give the content a name.');return}
+  S.pool.push({id:S.nextPoolId++,name:n,type:document.getElementById('poolType').value});
+  document.getElementById('poolName').value='';renderSched();toast('Added to pool — hit "Plan my week" to slot it.');
+}
+function planWeek(){
+  if(!S.pool.length){toast('Pool is empty — add content first.');return}
+  const cap=PLANS[S.plan].postCap;let placed=0;
+  for(const slot of SLOTS){
+    if(!S.pool.length)break;
+    if(S.week[slot.d].posts.length)continue;
+    if(cap!==Infinity&&S.postsUsed+placed>=cap){toast(`Post cap hit (${cap}/mo on Hustle) — <b>${S.pool.length} pieces left unscheduled.</b> Pro fills every slot. <u onclick="showTab('pricing')" style="cursor:pointer">See the Ladder</u>`);break}
+    let idx=S.pool.findIndex(p=>p.type===slot.type);if(idx<0)idx=0;
+    const item=S.pool.splice(idx,1)[0];
+    S.week[slot.d].posts.push({name:item.name,type:item.type,t:slot.t,why:slot.why,confirmed:false});placed++;
+  }
+  if(placed){S.postsUsed+=placed;toast(`AI planned ${placed} post${placed>1?'s':''} into your best slots — confirm each one.`)}
+  renderSched();renderPlans();
+}
+function confirmPost(di,pi){S.week[di].posts[pi].confirmed=true;renderSched();toast('Confirmed — publishes automatically at slot time.')}
+function reslot(di,pi){
+  const p=S.week[di].posts.splice(pi,1)[0];
+  const open=SLOTS.find(s=>!S.week[s.d].posts.length);
+  if(open){p.t=open.t;p.why=open.why;S.week[open.d].posts.push(p);toast(`Moved to ${S.week[open.d].d} ${open.t} — next best open slot.`)}
+  else{S.week[di].posts.splice(pi,0,p);toast('No open slots this week.')}
+  renderSched();
+}
+function unschedule(di,pi){const p=S.week[di].posts.splice(pi,1)[0];S.pool.push({id:S.nextPoolId++,name:p.name,type:p.type});S.postsUsed=Math.max(0,S.postsUsed-1);renderSched();renderPlans();toast('Returned to pool.')}
+function clearWeek(){S.week.forEach(d=>{const back=d.posts.filter(p=>!p.confirmed);back.forEach(p=>S.pool.push({id:S.nextPoolId++,name:p.name,type:p.type}));S.postsUsed=Math.max(0,S.postsUsed-back.length);d.posts=d.posts.filter(p=>p.confirmed)});renderSched();renderPlans()}
+
+/* ============ AUTOMATIONS ============ */
+/* Gating rule: alerts at Hustle, actions at Pro, campaigns at Empire */
+const TIER_RANK={hustle:0,pro:1,empire:2};
+const AUTO_META={
+ 'Weekly Boss Report':{tier:'hustle',kind:'Alert',desc:'Every Monday: what sold, what to reorder, best post, DMs handled — one plain-language summary.'},
+ 'Drop Hype Detector':{tier:'hustle',kind:'Alert',desc:'Watches DM volume + story replies. When hype spikes, tells you to raise the drop qty or open pre-orders. (You act on it.)'},
+ 'Abandoned Cart Rescue':{tier:'pro',kind:'Action',desc:'DMs/emails cart-abandoners in your voice with a nudge. Recovers 8-15% of lost sales automatically.'},
+ 'Supplier Auto-PO':{tier:'pro',kind:'Action',desc:'REORDER verdicts auto-draft the purchase order for one-tap approval.'},
+ 'Price & Promo Advisor':{tier:'pro',kind:'Action',desc:'Pairs with HOLD verdicts — builds the bundle/flash-sale most likely to clear slow stock.'},
+ 'Customer Segments & Win-back':{tier:'empire',kind:'Campaign',desc:'Groups customers (first-timers, repeats, whales, gone-quiet) and runs win-back campaigns after 60 days — on its own.'},
+ 'Review & UGC Collector':{tier:'empire',kind:'Campaign',desc:'Post-delivery auto-ask for photos/reviews with a discount code. Best UGC feeds your content pool — compounding loop.'},
+ 'Fraud & Chargeback Shield':{tier:'empire',kind:'Campaign',desc:'Screens every order for risk signals (mismatched address, repeat chargeback emails) before you ship.'}};
+function autoAllowed(n){return TIER_RANK[S.plan]>=TIER_RANK[AUTO_META[n].tier]}
+function renderAutos(){
+  // enforce: downgrading auto-disables locked automations
+  Object.keys(S.autos).forEach(n=>{if(S.autos[n]&&!autoAllowed(n))S.autos[n]=false});
+  document.getElementById('autoGrid').innerHTML=Object.keys(AUTO_META).map(n=>{
+   const m=AUTO_META[n],ok=autoAllowed(n);
+   return `
+   <div class="panel" style="margin:0;${ok?'':'opacity:.72'}">
+    <div class="flex" style="justify-content:space-between">
+     <h3 style="font-size:17px">${n}</h3>
+     ${ok?`<button class="btn small ${S.autos[n]?'':'secondary'}" onclick="togAuto('${n}')">${S.autos[n]?'ON':'OFF'}</button>`
+        :`<button class="btn small secondary" onclick="togAuto('${n}')">🔒 ${AUTO_META[n].tier.toUpperCase()}</button>`}
+    </div>
+    <div style="margin:6px 0 0"><span class="chip ${ok?'on':''}" style="margin:0;font-size:10px">${m.kind}${ok?'':' · unlocks on '+m.tier.charAt(0).toUpperCase()+m.tier.slice(1)}</span></div>
+    <p class="sub" style="margin:8px 0 0">${m.desc}</p>
+   </div>`}).join('');
+  save();
+}
+function togAuto(n){
+  if(!autoAllowed(n)){
+    const m=AUTO_META[n];
+    toast(`<b>${n}</b> is a ${m.kind.toLowerCase()} automation — unlocks on <b>${m.tier.charAt(0).toUpperCase()+m.tier.slice(1)}</b>. Your tier gets the alerts; the higher tiers do the work. <u onclick="showTab('pricing')" style="cursor:pointer">See the Ladder</u>`);
+    return;
+  }
+  S.autos[n]=!S.autos[n];renderAutos();toast(n+(S.autos[n]?' enabled.':' disabled.'));
+}
+function bossReport(){
+  const P=S.products;const rev=P.reduce((a,p)=>a+p.sold14*p.price,0);
+  const re=P.filter(p=>analyze(p).v==='REORDER'),ho=P.filter(p=>analyze(p).v==='HOLD');
+  const conf=S.week.reduce((a,d)=>a+d.posts.filter(p=>p.confirmed).length,0);
+  modal(`<h3>Boss Report — this week</h3><p class="sub">Generated live from your demo data.</p>
+   <pre class="po">💰 SALES\n   TT$${rev.toLocaleString()} from ${P.reduce((a,p)=>a+p.sold14,0)} units (14d)\n   Best seller: ${[...P].sort((a,b)=>b.sold14-a.sold14)[0]?.name||'—'}\n\n📦 RESTOCK\n   ${re.length? 'Reorder now: '+re.map(p=>p.name+' (+'+analyze(p).qty+')').join(', '):'Nothing urgent to reorder'}\n   ${ho.length? 'Holding: '+ho.map(p=>p.name).join(', ')+' — promo suggested':'No slow stock'}\n\n💬 CHATBOT\n   ${S.botReplies} customer replies handled · ${S.escalations.length} escalated to you\n\n📅 CONTENT\n   ${conf} posts confirmed for auto-publish · ${S.pool.length} in pool\n\n🚚 DELIVERY\n   ${S.orders.filter(o=>o.status===3).length} delivered · ${S.orders.filter(o=>o.status>0&&o.status<3).length} in transit</pre>
+   <button class="btn" onclick="closeModal()">Done</button>`);
+}
+
+/* ============ PLANS ============ */
+function renderPlans(){
+  document.getElementById('planBadge').textContent=PLANS[S.plan].label+' · Demo';
+  document.getElementById('tierGrid').innerHTML=Object.keys(PLANS).map(k=>{const p=PLANS[k];const cur=k===S.plan;return `
+   <div class="tier ${k==='pro'?'popular':''} ${cur?'current':''}">
+    <div class="pop ${cur?'cur':''}" style="${k==='pro'||cur?'':'display:none'}">${cur?'YOUR PLAN':'THE STANDARD'}</div>
+    <h3 style="margin-top:6px">${p.label}</h3><div class="price">${p.price.split(' ')[0]}<small> ${p.price.split(' ').slice(1).join(' ')}</small></div>
+    <div style="color:var(--accent);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:15px;margin-top:-4px">${p.tag}</div>
+    <ul>${p.feats.map(f=>`<li>${f}</li>`).join('')}</ul>
+    <button class="btn ${cur?'ghost':k==='pro'?'':'secondary'}" style="width:100%" ${cur?'disabled':''} onclick="switchPlan('${k}')">${cur?'Current plan':'Switch to '+p.label}</button>
+   </div>`}).join('');
+  const cap=PLANS[S.plan],rows=[];
+  if(cap.replyCap!==Infinity){const over=Math.max(0,S.botReplies-cap.replyCap+41);rows.push(`💬 Bot ${S.botReplies>=cap.replyCap?'went quiet on ~'+over+' customers':'is '+(cap.replyCap-S.botReplies)+' replies from going quiet'} — est. <b>TT$${(over*60).toLocaleString()}</b> at risk. <span style="color:var(--accent)">Pro never goes quiet.</span>`)}
+  if(!cap.autoPO){const re=S.products.filter(p=>analyze(p).v==='REORDER').length;if(re)rows.push(`📦 <b>${re} REORDER verdict${re>1?'s':''}</b> waiting for you to write the supplier orders. <span style="color:var(--accent)">Pro drafts them same-day.</span>`)}
+  if(cap.postCap!==Infinity){rows.push(`📅 <b>${Math.max(0,SLOTS.length-cap.postCap+S.postsUsed)}</b> high-value posting slots will go unused at your cap. <span style="color:var(--accent)">Pro fills every slot.</span>`)}
+  if(S.plan!=='empire'){rows.push(`👑 On <b>Empire</b>, this entire dashboard runs itself — POs sent, couriers booked, win-backs firing — and you just read the Boss Report.`)}
+  if(!rows.length)rows.push('👑 Nothing left on the table — the brand is running itself. Check the Boss Report.');
+  document.getElementById('tableLeft').innerHTML=rows.map(r=>`<span>${r}</span>`).join('');
+  save();
+}
+function switchPlan(k){S.plan=k;renderAll();toast(`Switched to <b>${PLANS[k].label}</b> — caps and automation levels updated across the whole dashboard.`)}
+
+/* ============ CONNECT ============ */
+const PLATFORM_DESC={
+ 'Shopify':'Admin API reads products, inventory and orders in real time. Full two-way sync.',
+ 'WooCommerce':'REST API via your WordPress site. Stock, orders, fulfillment updates.',
+ 'Squarespace':'Commerce APIs (Orders + Inventory) on Core plans and up.',
+ 'Wix':'Wix Stores API — catalog, stock levels, order events via webhook.',
+ 'Custom-built site':'Supabase/Firebase/your own backend — API key + webhook, same pipeline as flvs.life.',
+ 'DM-Commerce':'No website? flvs.bran IS your store: catalog lives here, the bot takes orders in your DMs, sends payment links or books cash-on-delivery, and dispatches the courier.'};
+function renderConnect(){
+  document.getElementById('platformGrid').innerHTML=Object.keys(PLATFORM_DESC).map(n=>{const on=S.platforms[n];const dmc=n==='DM-Commerce';return `
+   <div class="tier" style="${on?'border-color:var(--ok)':dmc?'border-color:var(--accent)':''}">
+    ${on?'<div class="pop cur">CONNECTED</div>':dmc?'<div class="pop">MOST POPULAR START</div>':''}
+    <h3 style="font-size:18px;margin-top:6px">${n}</h3>
+    <p class="sub" style="min-height:58px">${PLATFORM_DESC[n]}</p>
+    <button class="btn ${on?'ghost':dmc?'':'secondary'}" style="width:100%" onclick="togPlatform('${n}')">${on?'Disconnect':dmc?'Activate DM-Commerce':'Connect'}</button>
+   </div>`}).join('');
+  save();
+}
+function togPlatform(n){
+  S.platforms[n]=!S.platforms[n];renderConnect();
+  if(S.platforms[n])toast(n==='DM-Commerce'?'DM-Commerce active — your catalog is the store. The bot now takes orders in your DMs; try creating one in Orders & Delivery.':`${n} connected — initial sync pulling products, stock and orders (demo).`);
+  else toast(n+' disconnected.');
+}
+
+/* ============ AUTH & ONBOARDING ============ */
+function renderAuth(){
+  const logged=S.account&&S.account.loggedIn;
+  document.getElementById('authWrap').classList.toggle('show',!logged);
+  document.getElementById('appHeader').style.display=logged?'flex':'none';
+  document.getElementById('nav').style.display=logged?'flex':'none';
+  document.querySelector('main').style.display=logged?'block':'none';
+  document.querySelector('footer').style.display=logged?'block':'none';
+  if(logged)document.getElementById('brandLabel').textContent=S.account.brandName?('— '+S.account.brandName):'';
+}
+function doLogin(){
+  if(S.account){S.account.loggedIn=true;save();renderAll();toast('Welcome back, '+(S.account.brandName||'boss')+' 👋')}
+  else toast('No account on this device yet — hit <b>Start your subscription</b> to create one.');
+}
+function signOut(){if(S.account){S.account.loggedIn=false;save()}renderAuth();document.getElementById('loginScreen').style.display='flex';document.getElementById('wizardScreen').style.display='none'}
+
+let W={step:1,data:{plan:'hustle',platform:'DM-Commerce',igOn:false,tkOn:false,waOn:false}};
+function startWizard(){W={step:1,data:{plan:'hustle',platform:'DM-Commerce',igOn:false,tkOn:false,waOn:false}};document.getElementById('loginScreen').style.display='none';document.getElementById('wizardScreen').style.display='block';renderWiz()}
+function wizHead(title,sub){return `
+  <div class="flex" style="gap:10px;align-items:baseline;margin-bottom:4px"><span class="flvslogo" style="font-size:26px">flvs<span class="co">co</span></span><span style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--accent)">bran</span></div>
+  <h2 style="margin-top:10px">${title}</h2><p class="sub">${sub}</p>
+  <div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=W.step?'on':''}"></i>`).join('')}</div>`}
+function gv(id){const e=document.getElementById(id);return e?e.value.trim():''}
+function renderWiz(){
+  const D=W.data,box=document.getElementById('wizBox');
+  if(W.step===1)box.innerHTML=wizHead('Tell us about your brand','This sets up your backoffice, your courier pickups, and how the bot signs off.')+`
+   <div class="panel">
+    <div class="row2"><div class="field"><label>Brand name *</label><input id="wBrand" value="${esc(D.brandName||'')}" placeholder="e.g. FLVS"></div>
+    <div class="field"><label>Owner name *</label><input id="wOwner" value="${esc(D.owner||'')}" placeholder="Your name"></div></div>
+    <div class="row2"><div class="field"><label>Email *</label><input id="wEmail" value="${esc(D.email||'')}" placeholder="you@brand.com"></div>
+    <div class="field"><label>Phone (11 digits, for courier)</label><input id="wPhone" value="${esc(D.phone||'')}" placeholder="18685551234"></div></div>
+    <div class="field"><label>Point of sale / pickup address (couriers collect here)</label><input id="wAddr" value="${esc(D.addr||'')}" placeholder="Street, area, Trinidad & Tobago"></div>
+    <div class="field"><label>What do you sell?</label><select id="wVert"><option>Clothing / fashion</option><option>Beauty & cosmetics</option><option>Food & beverage</option><option>Jewelry & accessories</option><option>Services</option><option>Other</option></select></div>
+    <div class="flex"><button class="btn" onclick="wizNext()">Continue</button><button class="btn ghost small" onclick="wizBack()">← Back</button></div>
+   </div>`;
+  if(W.step===2)box.innerHTML=wizHead('Pick your rung on the Ladder','Every tier has every feature — you choose how much runs without you. Change any time; no charge ever exceeds US$50.')+`
+   <div class="panel">
+    ${Object.keys(PLANS).map(k=>`<div class="plan-pick ${D.plan===k?'sel':''}" onclick="W.data.plan='${k}';renderWiz()">
+      <div class="flex" style="justify-content:space-between"><b>${PLANS[k].label} — ${PLANS[k].price}</b>${D.plan===k?'<span class="tick">✓ selected</span>':''}</div>
+      <div style="color:var(--accent);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:14px">${PLANS[k].tag}</div>
+    </div>`).join('')}
+    <p class="sub" style="margin:10px 0">14-day free trial of <b>Pro</b> included whichever you pick — feel the automated version first.</p>
+    <div class="flex"><button class="btn" onclick="wizNext()">Continue</button><button class="btn ghost small" onclick="wizBack()">← Back</button></div>
+   </div>`;
+  if(W.step===3)box.innerHTML=wizHead('Connect your store & socials','This is how the system reads stock, orders, DMs and IG data. Connect what you have — everything can be added later in Settings.')+`
+   <div class="panel">
+    <div class="field"><label>Where do you sell today?</label>
+     <select id="wPlat" onchange="W.data.platform=this.value;renderWiz()">
+      ${['DM-Commerce','Shopify','WooCommerce','Squarespace','Wix','Custom-built site'].map(p=>`<option ${D.platform===p?'selected':''}>${p}</option>`).join('')}
+     </select></div>
+    ${D.platform==='DM-Commerce'?'<p class="sub">No website needed — your catalog will live right in the backoffice and the bot takes orders in your DMs.</p>':`
+    <div class="field"><label>${D.platform} API key / access token</label><input id="wApi" value="${esc(D.apiKey||'')}" placeholder="Paste from your ${D.platform} admin — we'll guide you"></div>`}
+    <div class="field"><label>Socials (the bot & scheduler need these)</label>
+     <div class="flex" style="flex-wrap:wrap;gap:8px">
+      <button class="btn small ${D.igOn?'':'secondary'}" onclick="W.data.igOn=!W.data.igOn;renderWiz()">${D.igOn?'✓ Instagram connected':'Connect Instagram'}</button>
+      <button class="btn small ${D.waOn?'':'secondary'}" onclick="W.data.waOn=!W.data.waOn;renderWiz()">${D.waOn?'✓ WhatsApp Business':'Connect WhatsApp'}</button>
+      <button class="btn small ${D.tkOn?'':'secondary'}" onclick="W.data.tkOn=!W.data.tkOn;renderWiz()">${D.tkOn?'✓ TikTok connected':'Connect TikTok (optional)'}</button>
+     </div></div>
+    <div class="field"><label>oDeliver merchant token (optional — for auto courier booking)</label><input id="wOd" value="${esc(D.odKey||'')}" placeholder="From odeliver.org → Settings → API"></div>
+    <div class="flex"><button class="btn" onclick="wizNext()">Continue</button><button class="btn ghost small" onclick="wizBack()">← Back</button></div>
+   </div>`;
+  if(W.step===4)box.innerHTML=wizHead('Terms & data access','Read this — it covers exactly what we can and cannot see.')+`
+   <div class="panel">
+    <div class="tos">
+     <h4>1 · What the system accesses, and why</h4>
+     To run your automations, flvs.bran continuously reads the data you connect: stock levels, orders, sales, site events, Instagram DMs and insights, and your content pool. Without this access the restock engine, chatbot, scheduler and courier dispatch cannot operate.
+     <h4>2 · What our team can see</h4>
+     Your store's numbers — sales values, revenue, customer lists, messages — are <b>not viewed by our staff in day-to-day operation</b>. The system processes them automatically. However, you should know that flvs.bran personnel <b>do have the technical ability to access your dashboard data</b>, and will do so only when needed to operate the service, investigate a fault, or support you at your request. Support access is logged and visible to you in Settings.
+     <h4>3 · What we never do</h4>
+     We never sell, share, or disclose your business data to third parties, other brands on the platform, or advertisers. Each brand's data is isolated — no other brand can ever see yours.
+     <h4>4 · Your control</h4>
+     You can disconnect any integration, export your full data, or close your account at any time. On cancellation your data is deleted from our systems within 30 days.
+     <h4>5 · Billing</h4>
+     No single charge exceeds US$50. Hustle bills monthly; Pro and Empire bill weekly. Failed charges are retried automatically before any service interruption.
+     <h4>6 · The bot speaks as your brand</h4>
+     Chatbot replies are generated from the training you provide and your live catalog. You are responsible for the training content; refunds, disputes and wholesale conversations always escalate to you.
+    </div>
+    <label style="display:flex;gap:10px;align-items:flex-start;margin:14px 0;text-transform:none;font-size:13px;color:var(--text);letter-spacing:0">
+     <input type="checkbox" id="tosChk" style="margin-top:2px"> I have read and accept the terms above, including the data-access policy.</label>
+    <div class="flex"><button class="btn" onclick="finishWizard()">Create my backoffice →</button><button class="btn ghost small" onclick="wizBack()">← Back</button></div>
+   </div>`;
+  window.scrollTo(0,0);
+}
+function wizNext(){
+  const D=W.data;
+  if(W.step===1){D.brandName=gv('wBrand');D.owner=gv('wOwner');D.email=gv('wEmail');D.phone=gv('wPhone');D.addr=gv('wAddr');D.vertical=gv('wVert');
+   if(!D.brandName||!D.owner||!D.email){toast('Brand name, owner and email are required.');return}}
+  if(W.step===3){D.apiKey=gv('wApi');D.odKey=gv('wOd');
+   if(!D.igOn){toast('Connect Instagram — the bot and scheduler run on it. (One tap in this demo.)');return}}
+  W.step++;renderWiz();
+}
+function wizBack(){if(W.step===1){document.getElementById('wizardScreen').style.display='none';document.getElementById('loginScreen').style.display='flex'}else{W.step--;renderWiz()}}
+function finishWizard(){
+  if(!document.getElementById('tosChk').checked){toast('Tick the box to accept the terms & data-access policy first.');return}
+  S.account={...W.data,loggedIn:true,tosAcceptedAt:new Date().toISOString()};
+  S.plan=W.data.plan;
+  S.platforms[W.data.platform]=true;
+  document.getElementById('wizardScreen').style.display='none';
+  renderAll();
+  toast('Welcome to flvs.bran, <b>'+esc(W.data.brandName)+'</b> 🇹🇹 — your backoffice is live. Pro trial active for 14 days.');
+}
+
+/* ============ INIT ============ */
+function renderAll(){renderAuth();renderConnect();renderStore();renderRestock();renderOrders();renderBot();renderSched();renderAutos();renderPlans()}
+load();renderAll();
+addMsg('bot','Wah gwan! 👋 FLVS bot here — trained on your DMs, reading your live catalog. Ask mi anything.');
+</script>
+</body>
+</html>

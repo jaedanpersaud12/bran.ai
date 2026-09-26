@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flvs.bran — Master Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f4;--border:#e7e1d5;--text:#1c1a17;--muted:#8a8378;--accent:#cb352e;--accent2:#a32a24;--ok:#3f7d4e;--warn:#b07d2a}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(460px 320px at 15% 8%,rgba(203,53,46,.10),transparent 70%),radial-gradient(520px 380px at 85% 35%,rgba(203,53,46,.07),transparent 70%),radial-gradient(460px 320px at 40% 95%,rgba(176,125,42,.07),transparent 70%),var(--bg)}
+.flvslogo{font-weight:800;font-style:italic;letter-spacing:-.05em;line-height:1;display:inline-flex;align-items:baseline;color:#1c1a17}
+.flvslogo .co{font-style:normal;font-weight:800;font-size:.24em;background:#1c1a17;color:#fff;border-radius:999px;padding:.5em .55em;margin-left:.22em;transform:translateY(.05em)}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 30px;flex-wrap:wrap;gap:10px}
+.pill{background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:8px 18px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);text-decoration:none;cursor:pointer}
+.pill.dark{background:#1c1a17;color:#fff;border-color:#1c1a17}
+main{max-width:1080px;margin:0 auto;padding:20px 24px 50px}
+h1{font-weight:800;font-size:clamp(36px,6vw,62px);letter-spacing:-.04em;text-align:center;line-height:1.05;margin:24px 0 8px}
+h1 em{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;color:var(--accent)}
+.sub{color:var(--muted);font-size:15px;text-align:center;max-width:620px;margin:0 auto 14px;line-height:1.6}
+.mode{display:flex;justify-content:center;margin:18px 0 30px}
+.mode .tabs{display:flex;gap:2px;padding:5px;background:#1c1a17;border-radius:999px}
+.mode button{background:none;border:none;border-radius:999px;color:#cfc8bb;padding:9px 20px;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer}
+.mode button.active{background:var(--bg);color:#1c1a17}
+h2{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin:28px 0 4px}
+.gsub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.door{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:20px;box-shadow:0 8px 28px rgba(28,26,23,.06);text-decoration:none;color:var(--text);display:block;transition:.15s;position:relative}
+.door:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(28,26,23,.12)}
+.door .tag{display:inline-block;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:999px;padding:3px 11px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.door .icon{font-size:26px;margin-bottom:8px}
+.door h3{font-size:15px;font-weight:700;letter-spacing:.3px}
+.door p{color:var(--muted);font-size:12.5px;margin-top:5px;line-height:1.55}
+.door .go{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:10px;display:inline-block}
+.door.locked{border-color:#1c1a17}
+.door .lockchip{position:absolute;top:14px;right:14px;background:#1c1a17;color:#fff;font-size:9px;font-weight:800;letter-spacing:1px;padding:3px 10px;border-radius:999px}
+.stat{display:none;margin-top:10px;border-top:1px dashed var(--border);padding-top:9px;font-size:11.5px;color:var(--muted);line-height:1.7}
+.stat b{color:var(--text)}
+.stat .dot{color:var(--ok)}
+body.admin .stat{display:block}
+body.admin .adminonly{display:block}
+.adminonly{display:none}
+footer{border-top:1px solid var(--border);padding:22px 0;overflow:hidden;white-space:nowrap;margin-top:36px}
+.ticker{display:inline-block;padding-left:100%;animation:t 26s linear infinite;font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+@keyframes t{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.toast{position:fixed;bottom:24px;right:24px;max-width:400px;background:#fff;border:1px solid var(--accent);padding:14px 18px;border-radius:12px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:99;box-shadow:0 8px 24px rgba(28,26,23,.15)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <span class="flvslogo" style="font-size:30px">flvs<span class="co">co</span></span>
+  <div style="display:flex;gap:8px">
+    <a class="pill" href="flvs-bran-landing.html">About flvs.bran</a>
+    <span class="pill dark" id="adminPill" onclick="togAdmin()">🔐 Admin view: OFF</span>
+  </div>
+</header>
+<main>
+  <h1>Every division.<br><em>One door.</em></h1>
+  <p class="sub">The master hub for the FLVS universe — find the division you need, or switch on Admin view to see the whole brand in motion at a glance.</p>
+
+  <div class="mode"><div class="tabs">
+    <button class="active" onclick="setMode('all',this)">Everything</button>
+    <button onclick="setMode('customers',this)">I'm a customer</button>
+    <button onclick="setMode('brands',this)">I'm a brand owner</button>
+    <button onclick="setMode('ops',this)">Operations</button>
+  </div></div>
+
+  <section data-g="customers">
+    <h2>The bran Market — for customers</h2>
+    <p class="gsub">Every brand on the network sells in one mall. Shop across all of them, or track your order.</p>
+    <div class="grid">
+      <a class="door" href="flvs-bran-marketplace.html" style="border-color:var(--accent)"><span class="tag" style="color:var(--accent);border-color:var(--accent)">The Mall</span><div class="icon">🛍️</div><h3>The bran Market</h3><p>Shop every network brand in one place — swimwear, intimates, streetwear and more. Search the whole shelf; checkout in each brand's own store.</p><span class="go">Enter the Market →</span>
+        <div class="stat"><span class="dot">●</span> <b>3 brands · 16 products</b> live · TT$21,340 network sales this week</div></a>
+      <a class="door" href="flvs-bran-storefront.html"><span class="tag">Flagship</span><div class="icon">👙</div><h3>FLVS Swimwear</h3><p>The flagship store — handmade swimwear from T&amp;T. Straight to the source.</p><span class="go">Enter store →</span>
+        <div class="stat"><span class="dot">●</span> <b>6 products</b> live · 2 low stock · 3 orders in transit</div></a>
+      <a class="door" href="flvs-bran-storefront.html"><span class="tag">Orders</span><div class="icon">📦</div><h3>Track my order</h3><p>Got a code like OD-XXXX or TRK-XXXX from your DM? Follow your package here.</p><span class="go">Track it →</span>
+        <div class="stat"><b>312</b> packages tracked this month · 98% delivered on time</div></a>
+    </div>
+  </section>
+
+  <section data-g="brands">
+    <h2>Brand division — for owners</h2>
+    <p class="gsub">Run a brand on the network, or join it.</p>
+    <div class="grid">
+      <a class="door" href="flvs-bran-prototype.html"><span class="tag">Backoffice</span><div class="icon">👔</div><h3>Brand Backoffice</h3><p>Your restock AI, DM bot, scheduler, orders, and store settings — the whole engine room.</p><span class="go">Sign in →</span>
+        <div class="stat"><span class="dot">●</span> All engines running · <b>287</b> bot replies this month · 3 POs awaiting approval</div></a>
+      <a class="door" href="flvs-bran-landing.html"><span class="tag">Join</span><div class="icon">🪜</div><h3>Subscribe — The Ladder</h3><p>New brand? See the plans and start your subscription. Every tier, every feature.</p><span class="go">See plans →</span>
+        <div class="stat"><b>7</b> brands on the network · 1 trial converting this week</div></a>
+    </div>
+  </section>
+
+  <section data-g="ops">
+    <h2>Operations division</h2>
+    <p class="gsub">The moving parts behind every order.</p>
+    <div class="grid">
+      <a class="door" href="flvs-bran-driver.html"><span class="tag">Phase 2 fleet</span><div class="icon">🛵</div><h3>Driver App</h3><p>Runs, pickups, PIN-verified deliveries, and COD collection for the in-house fleet.</p><span class="go">Start shift →</span>
+        <div class="stat"><span class="dot">●</span> <b>1</b> run active · 5 stops · TT$900 COD in the field</div></a>
+      <a class="door" onclick="toast('oDeliver merchant dashboard opens at odeliver.org — courier bookings flow there automatically.');return false" href="#"><span class="tag">Courier partner</span><div class="icon">🚚</div><h3>oDeliver (T&amp;T)</h3><p>Third-party courier handling Trinidad &amp; Tobago deliveries until the fleet scales.</p><span class="go">Open partner portal →</span>
+        <div class="stat"><b>38</b> bookings this week · avg TT$38/delivery</div></a>
+    </div>
+  </section>
+
+  <section data-g="admin" class="adminonly">
+    <h2>Admin division — staff only</h2>
+    <p class="gsub">Visible because Admin view is on.</p>
+    <div class="grid">
+      <a class="door locked" href="flvs-bran-admin.html"><span class="lockchip">ADMIN</span><span class="tag">Platform</span><div class="icon">🔐</div><h3>Platform Admin</h3><p>All subscribers, MRR, tier distribution, suspensions, and the support access log.</p><span class="go">Enter portal →</span>
+        <div class="stat"><span class="dot">●</span> <b>7 brands</b> · <b>US$550 MRR</b> · 1 suspended · access log clean</div></a>
+      <a class="door locked" onclick="toast('Boss Report generates inside the Backoffice → Automations tab.');return false" href="flvs-bran-prototype.html"><span class="lockchip">ADMIN</span><span class="tag">Reports</span><div class="icon">📊</div><h3>Weekly Boss Report</h3><p>The Monday summary across the whole operation — sales, restocks, bots, content.</p><span class="go">Generate →</span>
+        <div class="stat">Last run: Monday · <b>TT$21,340</b> network sales reported</div></a>
+      <a class="door locked" onclick="toast('Blueprint PDF and NDA are in your project folder — flvs-bran-blueprint.pdf / flvs-bran-NDA.pdf');return false" href="#"><span class="lockchip">ADMIN</span><span class="tag">Documents</span><div class="icon">📄</div><h3>Blueprint &amp; Legal</h3><p>The system blueprint, domain architecture, pricing logic, and the developer NDA.</p><span class="go">Locate files →</span>
+        <div class="stat"><b>14-page</b> blueprint · NDA drafted, awaiting signature</div></a>
+    </div>
+  </section>
+</main>
+<footer><div class="ticker">Every Division ✦ One Door ✦ Automate the Life ✦ Made in T&amp;T 🇹🇹 ✦ Every Division ✦ One Door ✦ Automate the Life ✦ Made in T&amp;T 🇹🇹 ✦</div></footer>
+<div class="toast" id="toastEl"></div>
+<script>
+function toast(m){const t=document.getElementById('toastEl');t.innerHTML=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3200)}
+let admin=false;
+try{admin=localStorage.getItem('flvshubadmin')==='1'}catch(e){}
+function applyAdmin(){document.body.classList.toggle('admin',admin);
+ document.getElementById('adminPill').textContent='🔐 Admin view: '+(admin?'ON':'OFF');
+ document.getElementById('adminPill').style.background=admin?'var(--accent)':'#1c1a17';}
+function togAdmin(){admin=!admin;try{localStorage.setItem('flvshubadmin',admin?'1':'0')}catch(e){}applyAdmin();
+ toast(admin?'Admin view on — live status shows under every division, and the staff-only doors are unlocked.':'Admin view off — customer-facing hub only.')}
+function setMode(m,btn){
+ document.querySelectorAll('.mode button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+ document.querySelectorAll('section[data-g]').forEach(s=>{
+  const g=s.dataset.g;
+  const show=m==='all'||g===m||(g==='admin'&&m==='ops');
+  s.style.display=(g==='admin'&&!admin)?'none':(show?'block':'none');
+ });
+}
+applyAdmin();
+document.querySelectorAll('section[data-g="admin"]').forEach(s=>{if(!admin)s.style.display='none'});
+</script>
+</body>
+</html>

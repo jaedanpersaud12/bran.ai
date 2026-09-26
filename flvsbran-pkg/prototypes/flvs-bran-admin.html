@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flvs.bran — Platform Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f4;--border:#e7e1d5;--text:#1c1a17;--muted:#8a8378;--accent:#cb352e;--accent2:#a32a24;--ok:#3f7d4e;--warn:#b07d2a}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(460px 320px at 15% 10%,rgba(203,53,46,.10),transparent 70%),radial-gradient(520px 380px at 85% 40%,rgba(203,53,46,.07),transparent 70%),var(--bg)}
+.flvslogo{font-weight:800;font-style:italic;letter-spacing:-.05em;line-height:1;display:inline-flex;align-items:baseline;color:#1c1a17}
+.flvslogo .co{font-style:normal;font-weight:800;font-size:.24em;background:#1c1a17;color:#fff;border-radius:999px;padding:.5em .55em;margin-left:.22em;transform:translateY(.05em)}
+.flvslogo.inv{color:#fff}.flvslogo.inv .co{background:#fff;color:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:var(--accent2)}
+.btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn.small{padding:6px 12px;font-size:10px}
+input,select{background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;width:100%}
+label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:4px}
+.field{margin-bottom:12px}
+/* login */
+#login{position:fixed;inset:0;background:#cb352e;background-image:radial-gradient(circle at 30% 18%,#d8453d 0%,#cb352e 55%,#a82b25 100%);display:flex;align-items:center;justify-content:center;padding:24px;z-index:60}
+.login-card{width:100%;max-width:380px;text-align:center}
+.login-panel{background:#fff;border-radius:22px;padding:24px;text-align:left;margin-top:24px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+/* app */
+#app{display:none}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 28px 6px}
+.pill{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:999px;padding:7px 16px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+main{max-width:1150px;margin:0 auto;padding:20px 24px}
+h2{font-weight:700;font-size:clamp(26px,4vw,40px);letter-spacing:-.03em;text-align:center;margin:8px 0 4px}
+.sub{color:var(--muted);font-size:14px;text-align:center;max-width:640px;margin:0 auto 22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px}
+.card{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:18px;box-shadow:0 8px 28px rgba(28,26,23,.06);text-align:center}
+.card .label{display:inline-block;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:999px;padding:4px 12px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px}
+.card .value{font-size:26px;font-weight:800;margin-top:10px}
+.card .delta{font-size:12px;color:var(--muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.65);backdrop-filter:blur(10px);border-radius:18px;overflow:hidden;font-size:13px;box-shadow:0 8px 28px rgba(28,26,23,.06)}
+th{background:rgba(244,240,233,.8);color:var(--muted);text-align:left;padding:11px 13px;font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+td{padding:11px 13px;border-top:1px solid var(--border);vertical-align:middle}
+.badge{padding:3px 10px;border-radius:14px;font-size:10px;font-weight:700}
+.b-h{background:#9a927f1a;color:#7a7166;border:1px solid #9a927f}
+.b-p{background:#cb352e12;color:var(--accent);border:1px solid var(--accent)}
+.b-e{background:#1c1a17;color:#fff}
+.b-ok{background:#3f7d4e14;color:var(--ok);border:1px solid var(--ok)}
+.b-sus{background:#b07d2a15;color:var(--warn);border:1px solid var(--warn)}
+.panel{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:20px;margin:20px 0;box-shadow:0 8px 28px rgba(28,26,23,.06)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.logline{font-size:12px;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.logline b{color:var(--text)}
+.dist{display:flex;height:14px;border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.toast{position:fixed;bottom:24px;right:24px;max-width:420px;background:#fff;border:1px solid var(--accent);padding:14px 20px;border-radius:12px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:99;box-shadow:0 8px 24px rgba(28,26,23,.15)}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-card">
+    <div class="flvslogo inv" style="font-size:76px">flvs<span class="co">co</span></div>
+    <div style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:20px;letter-spacing:1.5px;margin-top:10px">Platform Admin · staff only</div>
+    <div class="login-panel">
+      <div class="field"><label>Admin email</label><input id="aEmail" placeholder="ikenna@flvs.life"></div>
+      <div class="field"><label>Password</label><input id="aPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+      <button class="btn" style="width:100%" onclick="login()">Enter admin portal</button>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">All admin access to brand data is logged and visible to the brand owner, per the platform terms.</p>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+<header>
+  <div style="display:flex;gap:10px;align-items:baseline">
+    <span class="flvslogo" style="font-size:28px">flvs<span class="co">co</span></span>
+    <span style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--accent)">admin</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span class="pill">● Platform Owner</span>
+    <button class="btn ghost small" onclick="logout()">Sign out</button>
+  </div>
+</header>
+<main>
+  <h2>The whole platform, one screen</h2>
+  <p class="sub">Every brand on the system, what they pay, what the machines are doing for them — and a full log of any time staff touched brand data.</p>
+  <div class="cards" id="statCards"></div>
+
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px">Subscribers</h3>
+      <button class="btn small" onclick="addBrand()">+ Add brand manually</button>
+    </div>
+    <table>
+      <thead><tr><th>Brand</th><th>Vertical</th><th>Plan</th><th>MRR (US$)</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody id="brandBody"></tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="panel" style="margin:0">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:6px">Tier distribution</h3>
+      <div class="dist" id="dist"></div>
+      <div id="distLabels" style="font-size:12px;color:var(--muted)"></div>
+      <p class="sub" style="text-align:left;margin:12px 0 0;font-size:12.5px">The goal shape: a wide Hustle base feeding a fat Pro middle. Watch for Hustle brands over 60 days old — the upgrade nudges should have moved them.</p>
+    </div>
+    <div class="panel" style="margin:0">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:6px">Support access log</h3>
+      <p class="sub" style="text-align:left;margin:0 0 8px;font-size:12.5px">Per the terms: every staff view of brand data is recorded here and mirrored to the brand owner's Settings.</p>
+      <div id="accessLog" style="max-height:220px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px">Platform pulse — this week</h3>
+    <div class="cards" style="margin:0" id="pulseCards"></div>
+  </div>
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const DEF={
+ brands:[
+  {id:1,name:'FLVS',vert:'Clothing / fashion',plan:'empire',status:'active',joined:'2026-05-02'},
+  {id:2,name:'Isla Glow Beauty',vert:'Beauty & cosmetics',plan:'pro',status:'active',joined:'2026-06-11'},
+  {id:3,name:'Trini Sauce Co',vert:'Food & beverage',plan:'pro',status:'active',joined:'2026-06-24'},
+  {id:4,name:'Gold Coast Jewels',vert:'Jewelry',plan:'hustle',status:'active',joined:'2026-07-08'},
+  {id:5,name:'Wave Check Apparel',vert:'Clothing / fashion',plan:'hustle',status:'active',joined:'2026-07-19'},
+  {id:6,name:'D Sweet Hand Bakery',vert:'Food & beverage',plan:'hustle',status:'trial',joined:'2026-08-01'},
+  {id:7,name:'Rebel Ink Studio',vert:'Services',plan:'pro',status:'suspended',joined:'2026-05-30'}
+ ],
+ nextId:8,
+ log:[
+  '2026-08-06 14:22 — ikenna@flvs.life viewed Trini Sauce Co dashboard (support ticket #218: courier webhook fault) · visible to owner',
+  '2026-08-03 10:05 — system auto-diagnostic read Isla Glow Beauty order table (dispatch retry) · visible to owner'
+ ],
+ loggedIn:false
+};
+const MRR={hustle:50,pro:100,empire:200};
+let S;
+function load(){try{const r=localStorage.getItem('flvsbranadmin');S=r?JSON.parse(r):JSON.parse(JSON.stringify(DEF))}catch(e){S=JSON.parse(JSON.stringify(DEF))}}
+function save(){try{localStorage.setItem('flvsbranadmin',JSON.stringify(S))}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3200)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function login(){S.loggedIn=true;save();render();toast('Welcome back, boss. Platform is healthy.')}
+function logout(){S.loggedIn=false;save();render()}
+function stamp(){const d=new Date();return d.toISOString().slice(0,10)+' '+d.toTimeString().slice(0,5)}
+function render(){
+ document.getElementById('login').style.display=S.loggedIn?'none':'flex';
+ document.getElementById('app').style.display=S.loggedIn?'block':'none';
+ if(!S.loggedIn)return;
+ const B=S.brands,act=B.filter(b=>b.status!=='suspended');
+ const mrr=act.reduce((a,b)=>a+(b.status==='trial'?0:MRR[b.plan]),0);
+ document.getElementById('statCards').innerHTML=`
+  <div class="card"><span class="label">Brands</span><div class="value">${B.length}</div><div class="delta">${B.filter(b=>b.status==='trial').length} on trial</div></div>
+  <div class="card"><span class="label">MRR</span><div class="value">US$${mrr.toLocaleString()}</div><div class="delta">≈ TT$${(mrr*6.8).toLocaleString()}</div></div>
+  <div class="card"><span class="label">Active</span><div class="value">${act.length}</div><div class="delta">${B.filter(b=>b.status==='suspended').length} suspended</div></div>
+  <div class="card"><span class="label">Avg / brand</span><div class="value">US$${act.length?Math.round(mrr/act.length):0}</div><div class="delta">per month</div></div>`;
+ const pb={hustle:'b-h',pro:'b-p',empire:'b-e'},sb={active:'b-ok',trial:'b-p',suspended:'b-sus'};
+ document.getElementById('brandBody').innerHTML=B.map(b=>`
+  <tr><td><b>${esc(b.name)}</b></td><td style="color:var(--muted)">${esc(b.vert)}</td>
+  <td><span class="badge ${pb[b.plan]}">${b.plan.toUpperCase()}</span></td>
+  <td>${b.status==='trial'?'—':'$'+MRR[b.plan]}</td>
+  <td><span class="badge ${sb[b.status]}">${b.status}</span></td>
+  <td style="color:var(--muted)">${b.joined}</td>
+  <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+   <button class="btn small secondary" onclick="viewBrand(${b.id})">View dashboard</button>
+   <button class="btn small ghost" onclick="cyclePlan(${b.id})">Plan ↻</button>
+   <button class="btn small ghost" onclick="togSus(${b.id})">${b.status==='suspended'?'Restore':'Suspend'}</button>
+  </div></td></tr>`).join('');
+ const counts={hustle:0,pro:0,empire:0};B.forEach(b=>counts[b.plan]++);
+ const tot=B.length||1;
+ document.getElementById('dist').innerHTML=
+  `<div style="width:${100*counts.hustle/tot}%;background:#9a927f"></div><div style="width:${100*counts.pro/tot}%;background:var(--accent)"></div><div style="width:${100*counts.empire/tot}%;background:#1c1a17"></div>`;
+ document.getElementById('distLabels').innerHTML=`Hustle ${counts.hustle} · <span style="color:var(--accent)">Pro ${counts.pro}</span> · Empire ${counts.empire}`;
+ document.getElementById('accessLog').innerHTML=S.log.map(l=>`<div class="logline">${esc(l)}</div>`).join('');
+ document.getElementById('pulseCards').innerHTML=`
+  <div class="card"><span class="label">Bot replies</span><div class="value">4,182</div><div class="delta">across all brands</div></div>
+  <div class="card"><span class="label">Orders dispatched</span><div class="value">312</div><div class="delta">via oDeliver</div></div>
+  <div class="card"><span class="label">POs drafted</span><div class="value">27</div><div class="delta">21 approved</div></div>
+  <div class="card"><span class="label">Posts published</span><div class="value">146</div><div class="delta">auto-scheduled</div></div>`;
+ save();
+}
+function viewBrand(id){
+ const b=S.brands.find(x=>x.id===id);
+ S.log.unshift(`${stamp()} — admin viewed ${b.name} dashboard (manual review) · visible to owner`);
+ render();
+ toast(`<b>Access logged.</b> Opening ${esc(b.name)}'s dashboard in read-only support mode — the owner sees this entry in their Settings.`);
+}
+function cyclePlan(id){
+ const b=S.brands.find(x=>x.id===id);
+ b.plan=b.plan==='hustle'?'pro':b.plan==='pro'?'empire':'hustle';
+ render();toast(`${esc(b.name)} moved to ${b.plan.toUpperCase()}.`);
+}
+function togSus(id){
+ const b=S.brands.find(x=>x.id===id);
+ b.status=b.status==='suspended'?'active':'suspended';
+ render();toast(`${esc(b.name)} ${b.status==='suspended'?'suspended — automations paused, data retained':'restored'}.`);
+}
+function addBrand(){
+ const n=prompt('Brand name?');if(!n)return;
+ S.brands.push({id:S.nextId++,name:n,vert:'Other',plan:'hustle',status:'trial',joined:new Date().toISOString().slice(0,10)});
+ render();toast(esc(n)+' added on trial.');
+}
+load();render();
+</script>
+</body>
+</html>

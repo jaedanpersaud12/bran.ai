@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flvs.bran — Driver</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f4;--border:#e7e1d5;--text:#1c1a17;--muted:#8a8378;--accent:#cb352e;--accent2:#a32a24;--ok:#3f7d4e;--warn:#b07d2a}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;box-shadow:0 0 60px rgba(28,26,23,.12)}
+.flvslogo{font-weight:800;font-style:italic;letter-spacing:-.05em;line-height:1;display:inline-flex;align-items:baseline;color:#1c1a17}
+.flvslogo .co{font-style:normal;font-weight:800;font-size:.24em;background:#1c1a17;color:#fff;border-radius:999px;padding:.5em .55em;margin-left:.22em;transform:translateY(.05em)}
+.flvslogo.inv{color:#fff}.flvslogo.inv .co{background:#fff;color:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:none;padding:12px 20px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;width:100%}
+.btn:hover{background:var(--accent2)}
+.btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn.small{padding:8px 14px;font-size:10px;width:auto}
+.btn.ok{background:var(--ok)}
+input{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:14px;width:100%}
+label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:4px}
+#login{position:fixed;inset:0;background:#cb352e;background-image:radial-gradient(circle at 30% 18%,#d8453d,#cb352e 55%,#a82b25);display:flex;align-items:center;justify-content:center;padding:22px;z-index:60}
+.lcard{width:100%;max-width:360px;text-align:center}
+.lpanel{background:#fff;border-radius:22px;padding:22px;text-align:left;margin-top:22px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+#app{display:none;padding-bottom:90px}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 8px}
+.pill{background:rgba(255,255,255,.7);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+main{padding:6px 16px}
+h2{font-weight:800;font-size:26px;letter-spacing:-.02em;margin:8px 0 2px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.statrow{display:flex;gap:10px;margin-bottom:16px}
+.stat{flex:1;background:rgba(255,255,255,.6);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.85);border-radius:18px;padding:12px;text-align:center;box-shadow:0 6px 20px rgba(28,26,23,.05)}
+.stat .v{font-size:20px;font-weight:800}
+.stat .l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-top:2px}
+.stop{background:rgba(255,255,255,.65);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.85);border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 6px 20px rgba(28,26,23,.06)}
+.stop.done{opacity:.55}
+.stop .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.tagchip{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+.t-pick{background:#1c1a17;color:#fff}
+.t-drop{background:#cb352e12;color:var(--accent);border:1px solid var(--accent)}
+.t-cod{background:#b07d2a15;color:var(--warn);border:1px solid var(--warn)}
+.stop h3{font-size:15px;font-weight:700}
+.stop .addr{color:var(--muted);font-size:12.5px;margin:3px 0 10px;line-height:1.5}
+.stop .acts{display:flex;gap:8px;flex-wrap:wrap}
+.modal-bg{position:fixed;inset:0;background:rgba(28,26,23,.5);display:none;align-items:flex-end;justify-content:center;z-index:80}
+.modal-bg.show{display:flex}
+.sheet{background:#fff;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:480px;box-shadow:0 -10px 40px rgba(28,26,23,.3)}
+.sheet h3{font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:8px}
+.pin{display:flex;gap:8px;margin:12px 0}
+.pin input{text-align:center;font-size:22px;font-weight:800;padding:10px 0}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);width:88%;max-width:420px;background:#fff;border:1px solid var(--accent);padding:12px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:99;box-shadow:0 8px 24px rgba(28,26,23,.2);text-align:center}
+.toast.show{opacity:1}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#1c1a17;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:40}
+.bottom b{color:#fff}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="lcard">
+    <div class="flvslogo inv" style="font-size:64px">flvs<span class="co">co</span></div>
+    <div style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:19px;letter-spacing:1.5px;margin-top:8px">Driver · Phase 2 fleet</div>
+    <div class="lpanel">
+      <div style="margin-bottom:12px"><label>Driver ID</label><input id="dId" placeholder="e.g. FLV-DRV-04"></div>
+      <div style="margin-bottom:14px"><label>PIN</label><input id="dPin" type="password" placeholder="••••" onkeydown="if(event.key==='Enter')login()"></div>
+      <button class="btn" onclick="login()">Start my shift</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+<header>
+  <div style="display:flex;gap:8px;align-items:baseline">
+    <span class="flvslogo" style="font-size:24px">flvs<span class="co">co</span></span>
+    <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--accent)">driver</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span class="pill" id="drvName">● On shift</span>
+    <button class="btn ghost small" onclick="logout()">End</button>
+  </div>
+</header>
+<main>
+  <h2>Today's run</h2>
+  <p class="sub">Pickups first, then drops routed by area. Tap Navigate for directions; every delivery needs proof.</p>
+  <div class="statrow" id="stats"></div>
+  <div id="stops"></div>
+</main>
+<div class="bottom">
+  <span style="font-size:13px" id="codLine">COD collected: <b>TT$0</b></span>
+  <span style="font-size:13px" id="payLine">Earnings: <b>TT$0</b></span>
+</div>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheetBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEF={
+ loggedIn:false,driver:'',
+ cod:0,earn:0,
+ stops:[
+  {id:1,type:'pick',name:'FLVS Studio (point of sale)',addr:'Woodbrook, Port of Spain — collect 4 packages',done:false},
+  {id:2,type:'drop',name:'Keisha M. · #1048',addr:'San Fernando — miniKINI · TT$300 · CASH ON DELIVERY',cod:300,pin:'4471',done:false},
+  {id:3,type:'drop',name:'Andre B. · #1046',addr:'Chaguanas — Island Crop Hoodie · prepaid',cod:0,pin:'8823',done:false},
+  {id:4,type:'drop',name:'Shania R. · #1045',addr:'Port of Spain — Flame Tringl Kini · prepaid',cod:0,pin:'1190',done:false},
+  {id:5,type:'drop',name:'Marcus T. · #1044',addr:'Arima — Steam Mono II · TT$600 · CASH ON DELIVERY',cod:600,pin:'6034',done:false}
+ ]
+};
+let S;
+function load(){try{const r=localStorage.getItem('flvsdriver');S=r?JSON.parse(r):JSON.parse(JSON.stringify(DEF))}catch(e){S=JSON.parse(JSON.stringify(DEF))}}
+function save(){try{localStorage.setItem('flvsdriver',JSON.stringify(S))}catch(e){}}
+function toast(m){const t=document.getElementById('toast');t.innerHTML=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3000)}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function modal(h){document.getElementById('sheetBox').innerHTML=h;document.getElementById('modalBg').classList.add('show')}
+function closeModal(){document.getElementById('modalBg').classList.remove('show')}
+function login(){S.loggedIn=true;S.driver=document.getElementById('dId').value.trim()||'FLV-DRV-04';save();render()}
+function logout(){S.loggedIn=false;save();render()}
+function render(){
+ document.getElementById('login').style.display=S.loggedIn?'none':'flex';
+ document.getElementById('app').style.display=S.loggedIn?'block':'none';
+ if(!S.loggedIn)return;
+ document.getElementById('drvName').textContent='● '+S.driver;
+ const done=S.stops.filter(s=>s.done).length;
+ document.getElementById('stats').innerHTML=`
+  <div class="stat"><div class="v">${S.stops.length-done}</div><div class="l">Stops left</div></div>
+  <div class="stat"><div class="v">${done}</div><div class="l">Completed</div></div>
+  <div class="stat"><div class="v">TT$${S.cod}</div><div class="l">COD held</div></div>
+  <div class="stat"><div class="v">TT$${S.earn}</div><div class="l">Earned</div></div>`;
+ document.getElementById('codLine').innerHTML=`COD collected: <b>TT$${S.cod}</b>`;
+ document.getElementById('payLine').innerHTML=`Earnings: <b>TT$${S.earn}</b>`;
+ const pickPending=S.stops.some(s=>s.type==='pick'&&!s.done);
+ document.getElementById('stops').innerHTML=S.stops.map(s=>`
+  <div class="stop ${s.done?'done':''}">
+   <div class="top">
+    <span class="tagchip ${s.type==='pick'?'t-pick':'t-drop'}">${s.type==='pick'?'PICKUP':'DROP-OFF'}</span>
+    ${s.cod?`<span class="tagchip t-cod">COD TT$${s.cod}</span>`:''}
+   </div>
+   <h3>${esc(s.name)}</h3>
+   <div class="addr">${esc(s.addr)}</div>
+   ${s.done?'<span style="color:var(--ok);font-weight:700;font-size:12px">✓ Complete</span>':`
+   <div class="acts">
+    <button class="btn small secondary" onclick="toast('Opening maps navigation to ${esc(s.name).replace(/'/g,'')}…')">Navigate</button>
+    ${s.type==='pick'?`<button class="btn small" onclick="doPickup(${s.id})">Confirm pickup</button>`
+     :`<button class="btn small" ${pickPending?'disabled style="opacity:.4"':''} onclick="doDeliver(${s.id})">${pickPending?'After pickup':'Deliver'}</button>`}
+   </div>`}
+  </div>`).join('');
+ save();
+}
+function doPickup(id){
+ const s=S.stops.find(x=>x.id===id);
+ modal(`<h3>Pickup — ${esc(s.name)}</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Scan or count the packages, snap a photo of the batch, and the brand gets an automatic "picked up" notification.</p>
+  <button class="btn secondary" style="margin-bottom:10px" onclick="this.textContent='✓ Photo captured'">📷 Photo of packages</button>
+  <button class="btn ok" onclick="finishStop(${id});closeModal();toast('4 packages on board — customers notified automatically.')">Confirm 4 packages collected</button>`);
+}
+function doDeliver(id){
+ const s=S.stops.find(x=>x.id===id);
+ modal(`<h3>Deliver — ${esc(s.name)}</h3>
+  ${s.cod?`<p style="font-size:14px;margin-bottom:10px">💵 Collect <b>TT$${s.cod}</b> cash before handover.</p>`:'<p style="font-size:13px;color:var(--muted);margin-bottom:10px">Prepaid — hand over on PIN.</p>'}
+  <label>Customer's 4-digit PIN (from their DM)</label>
+  <div class="pin"><input id="pinIn" maxlength="4" inputmode="numeric" placeholder="••••"></div>
+  <button class="btn secondary" style="margin-bottom:10px" onclick="this.textContent='✓ Proof photo captured'">📷 Proof of delivery photo</button>
+  <button class="btn ok" onclick="checkPin(${id})">Complete delivery</button>`);
+}
+function checkPin(id){
+ const s=S.stops.find(x=>x.id===id);
+ const v=document.getElementById('pinIn').value.trim();
+ if(v!==s.pin){toast('Wrong PIN — ask the customer to check their DM. (Demo hint: '+s.pin+')');return}
+ if(s.cod)S.cod+=s.cod;
+ finishStop(id);closeModal();
+ toast('Delivered ✓ — brand and customer notified, proof stored.'+(s.cod?' COD logged: TT$'+s.cod:''));
+}
+function finishStop(id){
+ const s=S.stops.find(x=>x.id===id);s.done=true;S.earn+=s.type==='pick'?10:25;
+ if(S.stops.every(x=>x.done)){setTimeout(()=>toast('Run complete 🇹🇹 — TT$'+S.earn+' earned. Remit TT$'+S.cod+' COD at the studio.'),400)}
+ render();
+}
+load();render();
+</script>
+</body>
+</html>

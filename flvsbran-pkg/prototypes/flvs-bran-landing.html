@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>flvs.bran — The AI backoffice for Caribbean brands</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f4;--border:#e7e1d5;--text:#1c1a17;--muted:#8a8378;--accent:#cb352e;--accent2:#a32a24;--ok:#3f7d4e}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+body{background:var(--bg);color:var(--text)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(460px 320px at 15% 10%,rgba(203,53,46,.10),transparent 70%),radial-gradient(520px 380px at 85% 40%,rgba(203,53,46,.07),transparent 70%),radial-gradient(460px 320px at 40% 95%,rgba(176,125,42,.07),transparent 70%),var(--bg)}
+.flvslogo{font-weight:800;font-style:italic;letter-spacing:-.05em;line-height:1;display:inline-flex;align-items:baseline;color:#1c1a17}
+.flvslogo .co{font-style:normal;font-weight:800;font-size:.24em;background:#1c1a17;color:#fff;border-radius:999px;padding:.5em .55em;margin-left:.22em;transform:translateY(.05em)}
+.flvslogo.inv{color:#fff}.flvslogo.inv .co{background:#fff;color:var(--accent)}
+header{display:flex;justify-content:space-between;align-items:center;padding:20px 30px}
+.pill{background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:999px;padding:8px 18px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);text-decoration:none}
+.menu{display:flex;gap:2px;padding:6px;background:#1c1a17;border-radius:999px}
+.menu a{color:#cfc8bb;padding:8px 16px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none}
+.menu a:hover{color:#fff}
+.hero{text-align:center;padding:60px 20px 30px;max-width:900px;margin:0 auto}
+h1{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(40px,7vw,76px);letter-spacing:-.04em;line-height:1.02}
+h1 em{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;color:var(--accent)}
+.hero p{color:var(--muted);font-size:17px;max-width:620px;margin:18px auto 26px;line-height:1.6}
+.btn{display:inline-block;background:var(--accent);color:#fff;border:none;padding:14px 30px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--accent2)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+section{max-width:1100px;margin:0 auto;padding:40px 24px}
+h2{font-weight:700;font-size:clamp(28px,4vw,42px);letter-spacing:-.03em;text-align:center;margin-bottom:8px}
+.sub{color:var(--muted);text-align:center;max-width:640px;margin:0 auto 30px;font-size:15px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.glass{background:rgba(255,255,255,.55);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.8);border-radius:22px;padding:26px 22px;box-shadow:0 8px 28px rgba(28,26,23,.06);text-align:center}
+.glass .tag{display:inline-block;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:999px;padding:4px 12px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+.glass .icon{font-size:30px;margin:8px 0 12px}
+.glass h3{font-size:14px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;line-height:1.5}
+.glass p{color:var(--muted);font-size:13px;margin-top:8px;line-height:1.6}
+.tier{position:relative;text-align:left}
+.tier .pop{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:800;letter-spacing:1.5px;padding:3px 14px;border-radius:12px;white-space:nowrap}
+.tier .price{font-size:34px;font-weight:800;margin:8px 0 2px}
+.tier .price small{font-size:13px;color:var(--muted);font-weight:400}
+.tier .tag2{color:var(--accent);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:15px}
+.tier ul{list-style:none;margin:14px 0}
+.tier li{padding:5px 0;font-size:13px;color:var(--muted)}
+.tier li::before{content:"✓ ";color:var(--accent);font-weight:700}
+.strip{background:#cb352e;color:#fff;text-align:center;padding:56px 20px;border-radius:28px;margin:30px 24px;background-image:radial-gradient(circle at 30% 20%,#d8453d,#cb352e 60%,#a82b25)}
+.strip h2{color:#fff}
+.strip p{color:#ffe;opacity:.9;max-width:560px;margin:10px auto 24px;font-size:15px}
+.strip .btn{background:#fff;color:var(--accent)}
+footer{border-top:1px solid var(--border);padding:22px 0;overflow:hidden;white-space:nowrap;margin-top:30px}
+.ticker{display:inline-block;padding-left:100%;animation:t 26s linear infinite;font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+@keyframes t{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.persona{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <span class="flvslogo" style="font-size:30px">flvs<span class="co">co</span></span>
+  <nav class="menu">
+    <a href="#engines">The System</a><a href="#ladder">The Ladder</a><a href="flvs-bran-prototype.html">Sign in</a>
+  </nav>
+  <a class="pill" href="flvs-bran-prototype.html">● Brand Backoffice</a>
+</header>
+
+<div class="hero">
+  <h1>Your brand,<br><em>running itself.</em></h1>
+  <p>flvs.bran is the AI backoffice for Caribbean brands — it answers your DMs in your voice, tells you what to restock, schedules your posts, and sends every order out the door with a courier. Built in Trinidad, by the team behind FLVS.</p>
+  <a class="btn" href="flvs-bran-prototype.html">Start your subscription</a>
+  <a class="btn ghost" href="#engines" style="margin-left:10px">See how it works</a>
+</div>
+
+<section id="engines">
+  <h2>Five engines. One backoffice.</h2>
+  <p class="sub">Everything a one-person brand does at 2am, done by the system instead.</p>
+  <div class="grid">
+    <div class="glass"><span class="tag">Inventory</span><div class="icon">📦</div><h3>Restock AI</h3><p>Reads stock, sales pace, and DM demand — tells you exactly what to reorder and what to hold, with the supplier order drafted.</p></div>
+    <div class="glass"><span class="tag">Inbox</span><div class="icon">💬</div><h3>DM Chatbot</h3><p>Trained on your real conversations — it answers in your voice, your slang, 24/7. Refunds and big deals still come to you.</p></div>
+    <div class="glass"><span class="tag">Content</span><div class="icon">📅</div><h3>Post Scheduler</h3><p>Drop content in the pool; the AI picks the day and hour from your IG data. You just tap confirm.</p></div>
+    <div class="glass"><span class="tag">Delivery</span><div class="icon">🚚</div><h3>Order Dispatch</h3><p>Every paid order books its own courier — pickup at your point of sale, tracking to the customer, cash-on-delivery supported.</p></div>
+    <div class="glass"><span class="tag">No website?</span><div class="icon">🛍️</div><h3>DM-Commerce</h3><p>Sell straight from your IG DMs with no website — your catalog lives in the backoffice and the bot takes the orders.</p></div>
+  </div>
+</section>
+
+<section id="ladder">
+  <h2>The Ladder</h2>
+  <p class="sub">Every tier has every feature — you buy how much runs without you. No charge ever exceeds US$50, the daily limit on most TT debit cards.</p>
+  <div class="grid">
+    <div class="glass tier"><h3>Hustle</h3><div class="price">$50<small> US/mo</small></div><div class="tag2">"The system works. You still press the buttons."</div>
+     <ul><li>DM-Commerce — sell with no website</li><li>Chatbot · 300 replies/mo</li><li>Restock verdicts</li><li>10 AI-scheduled posts/mo</li><li>Alert automations</li></ul>
+     <a class="btn ghost" style="width:100%;text-align:center" href="flvs-bran-prototype.html">Start here</a></div>
+    <div class="glass tier" style="border-color:var(--accent)"><div class="pop">THE STANDARD</div><h3>Pro</h3><div class="price">$25<small> US/wk</small></div><div class="tag2">"The system runs. You approve."</div>
+     <ul><li>Unlimited replies + posts</li><li>Auto supplier POs</li><li>Auto courier dispatch</li><li>Cart rescue + hype alerts</li><li>Weekly Boss Report</li></ul>
+     <a class="btn" style="width:100%;text-align:center" href="flvs-bran-prototype.html">Free 14-day trial</a></div>
+    <div class="glass tier"><h3>Empire</h3><div class="price">$50<small> US/wk</small></div><div class="tag2">"The brand runs itself. You check the report."</div>
+     <ul><li>Campaign automations</li><li>Everything fully automatic</li><li>Multi-brand accounts</li><li>Priority support</li><li>First access to new tools</li></ul>
+     <a class="btn ghost" style="width:100%;text-align:center" href="flvs-bran-prototype.html">Build to this</a></div>
+  </div>
+</section>
+
+<section>
+  <h2>One ecosystem, every door</h2>
+  <p class="sub">Demo pages for everyone who touches the system:</p>
+  <div class="persona">
+    <a class="pill" href="flvs-bran-prototype.html">👔 Brand Backoffice</a>
+    <a class="pill" href="flvs-bran-storefront.html">🛍️ Shop & Track (customer)</a>
+    <a class="pill" href="flvs-bran-driver.html">🛵 Driver App</a>
+    <a class="pill" href="flvs-bran-admin.html">🔐 Platform Admin</a>
+  </div>
+</section>
+
+<div class="strip">
+  <h2>Ready to automate the life?</h2>
+  <p>Set up takes 10 minutes: your brand, your rung on the Ladder, your integrations — and the system takes the night shift from there.</p>
+  <a class="btn" href="flvs-bran-prototype.html">Start your subscription →</a>
+</div>
+
+<footer><div class="ticker">Automate the Life ✦ Made for Caribbean Brands 🇹🇹 ✦ Restock Smarter ✦ Answer Every DM ✦ Automate the Life ✦ Made for Caribbean Brands 🇹🇹 ✦ Restock Smarter ✦ Answer Every DM ✦</div></footer>
+</body>
+</html>

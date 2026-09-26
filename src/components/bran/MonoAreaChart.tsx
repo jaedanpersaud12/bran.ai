@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import {
   Area,
   AreaChart,
@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { MonoTooltip } from "@/components/bran/MonoTooltip";
+import { useReducedMotion } from "@/hooks/use-media-query";
 import { DATE_LOCALE, formatMoney, type RevenuePoint } from "@/lib/metrics";
 
 /**
@@ -46,15 +47,7 @@ export default function MonoAreaChart({ series }: { series: RevenuePoint[] }) {
    * server has no media query to answer, and branching on one here would mean
    * the markup React builds on the client disagrees with what was sent.
    */
-  const [stillness, setStillness] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setStillness(query.matches);
-    const onChange = () => setStillness(query.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
-  }, []);
+  const stillness = useReducedMotion();
 
   const day = new Intl.DateTimeFormat(DATE_LOCALE, { month: "short", day: "numeric" });
   const full = new Intl.DateTimeFormat(DATE_LOCALE, {

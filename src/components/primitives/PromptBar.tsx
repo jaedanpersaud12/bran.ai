@@ -39,6 +39,8 @@ const GLYPHS: Record<string, React.ReactNode> = {
 };
 
 /* real product marks, inline so the file stays self-contained */
+/* Third-party logos keep their owners' colours, so these can't be tokens. */
+/* eslint-disable @ja3dan/no-raw-colors */
 const BRANDS: Record<string, React.ReactNode> = {
   figma: (
     <svg width="11" height="16" viewBox="0 0 38 57" aria-hidden="true">
@@ -67,6 +69,7 @@ const BRANDS: Record<string, React.ReactNode> = {
     </svg>
   ),
 };
+/* eslint-enable @ja3dan/no-raw-colors */
 
 type Source = {
   key: string;
@@ -115,7 +118,7 @@ const AUTO_STEPS: {
   model?: string;
   hold: number;
 }[] = [
-  { draft: "", connect: false, model: "vanilla-1", hold: 1100 },
+  { draft: "", connect: false, model: "bran-dialect", hold: 1100 },
   { draft: "@", active: 0, hold: 900 },
   { draft: "@", active: 1, hold: 620 },
   { draft: "@", active: 4, hold: 620 },
@@ -128,7 +131,7 @@ const AUTO_STEPS: {
   { draft: "", hold: 800 },
   // open the model picker and upgrade to the flagship → rainbow sweep
   { draft: "", modelOpen: true, hold: 1200 },
-  { draft: "", model: "sprinkles-5", hold: 2400 },
+  { draft: "", model: "bran-2", hold: 2400 },
   { draft: "", hold: 900 },
 ];
 
@@ -207,10 +210,16 @@ export default function PromptBar({
         ? COMMANDS.filter((c) => c.name.slice(1).startsWith(query))
         : [];
 
-  useEffect(() => {
+  /* a different menu or query starts the highlight over at the top.
+   * Adjusted during render, from the previous value, rather than in an
+   * effect — an effect would paint the stale highlight for a frame first. */
+  const menuKey = `${menu}:${query}`;
+  const [shownMenuKey, setShownMenuKey] = useState(menuKey);
+  if (shownMenuKey !== menuKey) {
+    setShownMenuKey(menuKey);
     setActive(0);
     setEngaged(false);
-  }, [menu, query]);
+  }
 
   /* a single highlight glides to the active row instead of each row
    * toggling its own background — matches the gliding pill in the nav */
@@ -238,9 +247,7 @@ export default function PromptBar({
     setModelMenuBottom(anchorRect.bottom - triggerRect.top + 8);
   }, [modelOpen, wide, model.name]);
 
-  useEffect(() => {
-    if (!modelOpen) setModelHovered(null);
-  }, [modelOpen]);
+  if (!modelOpen && modelHovered !== null) setModelHovered(null);
 
   /* Build the shader with a pinned hue phase. createShader seeds its
    * internal hueShift from Math.random(), which made the sweep a different
@@ -271,7 +278,6 @@ export default function PromptBar({
       shaderRef.current?.destroy();
       shaderRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const celebrate = () => {
@@ -304,23 +310,28 @@ export default function PromptBar({
   const selectModel = (next: (typeof MODELS)[number]) => {
     setModel(next);
     setModelOpen(false);
-    if (next.key === "sprinkles-5") celebrate();
+    if (next.key === "bran-2") celebrate();
   };
 
-  /* autoplay: apply the current step, then advance after its hold */
+  /* autoplay: hold the current step, then apply the next one. The first
+   * step is the initial state, so nothing needs applying on mount. */
   useEffect(() => {
     if (!auto) return;
-    const step = AUTO_STEPS[autoStep % AUTO_STEPS.length];
-    setDraft(step.draft);
-    if (step.active !== undefined) setActive(step.active);
-    if (step.connect !== undefined) setConnected(step.connect);
-    if (step.modelOpen !== undefined) setModelOpen(step.modelOpen);
-    if (step.model) {
-      const next = MODELS.find((m) => m.key === step.model);
-      if (next) selectModel(next);
-    }
-    const t = setTimeout(() => setAutoStep((s) => s + 1), step.hold);
+    const hold = AUTO_STEPS[autoStep % AUTO_STEPS.length].hold;
+    const t = setTimeout(() => {
+      const step = AUTO_STEPS[(autoStep + 1) % AUTO_STEPS.length];
+      setDraft(step.draft);
+      if (step.active !== undefined) setActive(step.active);
+      if (step.connect !== undefined) setConnected(step.connect);
+      if (step.modelOpen !== undefined) setModelOpen(step.modelOpen);
+      if (step.model) {
+        const next = MODELS.find((m) => m.key === step.model);
+        if (next) selectModel(next);
+      }
+      setAutoStep((s) => s + 1);
+    }, hold);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auto, autoStep]);
 
   /* dictation resolves after a beat, like a real transcript landing */

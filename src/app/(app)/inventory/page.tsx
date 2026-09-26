@@ -11,6 +11,7 @@ import {
 import RecommendationCard from "@/components/primitives/RecommendationCard";
 import { EntityChip } from "@/components/atoms/EntityChip";
 import { ValuePill } from "@/components/atoms/ValuePill";
+import { ReorderPlanner } from "@/components/bran/ReorderPlanner";
 import { PageHeader, Panel, StatRow } from "@/components/bran/Page";
 import { RESTOCK_SIGNAL, STOCK, formatMoneyWhole, type StockState } from "@/lib/demo";
 
@@ -55,7 +56,6 @@ export default function InventoryPage() {
         <Button variant="outline" size="sm">
           Export
         </Button>
-        <Button size="sm">Draft {RESTOCK_SIGNAL.flagged} reorders</Button>
       </PageHeader>
 
       <StatRow
@@ -148,52 +148,10 @@ export default function InventoryPage() {
       </Panel>
 
       <Panel
-        title="What to reorder"
-        hint="Sorted by days of cover. Anything already out sits at the top."
+        title="Plan the reorder"
+        hint="Filled in with what the model would order. Change anything you disagree with."
       >
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Piece</TableHead>
-                <TableHead className="text-right">On hand</TableHead>
-                <TableHead className="text-right">14-day forecast</TableHead>
-                <TableHead className="text-right">Cover</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>What the model says</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {ordered.map((item) => (
-                <TableRow key={item.sku}>
-                  <TableCell>
-                    <span className="font-medium">{item.name}</span>
-                    <span className="block text-[12px] text-muted-foreground">
-                      {item.variant} · <span className="font-mono">{item.sku}</span>
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{item.onHand}</TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {item.forecast14}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {item.daysCover === null ? (
-                      <span className="text-negative">—</span>
-                    ) : (
-                      `${item.daysCover}d`
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={stateVariant(item.state)}>{STATE_LABEL[item.state]}</Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[22rem] whitespace-normal text-muted-foreground">
-                    {item.advice}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <ReorderPlanner items={ordered} />
       </Panel>
     </div>
   );

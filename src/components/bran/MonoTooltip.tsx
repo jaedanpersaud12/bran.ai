@@ -35,7 +35,7 @@ export function MonoTooltip({
   if (!active || !payload || payload.length === 0) return null;
 
   return (
-    <div className="pointer-events-none z-50 rounded-xl border border-border bg-popover/95 px-3 py-2 text-xs shadow-2xl shadow-black/10 backdrop-blur-md">
+    <div className="pointer-events-none z-50 rounded-xl border border-border bg-popover/95 px-3 py-2 text-xs shadow-2xl shadow-foreground/10 backdrop-blur-md">
       {label ? (
         <div className="mb-1.5 border-b border-border pb-1 font-medium tracking-tight text-muted-foreground">
           {label}
@@ -56,7 +56,7 @@ export function MonoTooltip({
               <div className="flex items-center gap-1.5">
                 {indicator === "dot" ? (
                   <span
-                    className="size-2 rounded-full ring-1 ring-black/10"
+                    className="size-2 rounded-full ring-1 ring-foreground/10"
                     style={{ backgroundColor: color }}
                   />
                 ) : (

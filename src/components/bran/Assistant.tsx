@@ -16,6 +16,7 @@ import ThinkingState from "@/components/primitives/ThinkingState";
 import ToolChips from "@/components/primitives/ToolChips";
 import TaskRows from "@/components/primitives/TaskRows";
 import PromptBar from "@/components/primitives/PromptBar";
+import { useReducedMotion } from "@/hooks/use-media-query";
 import { ASSISTANT, CONVERSATIONS } from "@/lib/demo";
 
 /**
@@ -126,23 +127,12 @@ export function Assistant() {
    * produced. The advance is driven by the primitives' own signals where they
    * have them (`onSettled`), and by their own step rate where they do not.
    */
-  const [stage, setStage] = useState(0);
-  const [still, setStill] = useState(false);
-
-  useEffect(() => {
-    setStill(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-  // Switching threads restarts the run.
-  useEffect(() => {
-    setStage(0);
-  }, [conversation.key]);
+  const [runStage, setStage] = useState(0);
+  const still = useReducedMotion();
 
   // Reduced motion gets the whole transcript at once: staging it would mean
   // withholding the answer from somebody who asked for no animation.
-  useEffect(() => {
-    if (still) setStage(2);
-  }, [still, conversation.key]);
+  const stage = still ? 2 : runStage;
 
   const toolBlock =
     conversation.key === "dm" ? "chips" : conversation.key === "dispatch" ? "rows" : null;
@@ -203,7 +193,11 @@ export function Assistant() {
                   key={item.key}
                   role="tab"
                   aria-selected={selected}
-                  onClick={() => setActive(index)}
+                  onClick={() => {
+                    // Switching threads restarts the run.
+                    setActive(index);
+                    setStage(0);
+                  }}
                   className={`rounded-full px-2.5 py-1 text-[12px] font-medium transition-[background-color,color] duration-150 focus-visible:ring-[3px] focus-visible:ring-ring/25 focus-visible:outline-none ${
                     selected
                       ? "bg-muted text-foreground ring-1 ring-border"

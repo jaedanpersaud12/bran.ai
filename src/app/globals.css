@@ -2,6 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 /*
+ * groundwork's token contract. It maps every contract token to a utility and
+ * defines the `dark` variant; the values come from our `:root` below. Its
+ * base.css is left out on purpose: the letter-spacing scale it sets would
+ * retrack every screen, and bran keeps the type it was designed with.
+ */
+@import "@ja3dan/tokens/theme.css";
+/*
  * Beautiful UI's foundation (beautifului.dev, MIT), installed through their
  * shadcn registry. It carries the tokens and utilities its primitives are
  * built on — `text-ink`, `bg-surface`, `border-line`, `shadow-card`.
@@ -14,7 +21,7 @@
  */
 @import "./beautifui/foundation.css";
 
-@custom-variant dark (&:is(.dark *));
+/* @ja3dan/tokens light-only */
 
 /*
  * flvs.bran runs on its own palette, not the storefront's.
@@ -43,7 +50,19 @@
   --accent-neutral: #f1f1ee;
   --accent: var(--accent-neutral);
   --accent-foreground: #17171a;
+  --subtle-foreground: #8e8d88;
   --destructive: #c2312b;
+  --destructive-foreground: #ffffff;
+  --destructive-subtle: #fbeceb;
+  --success: var(--positive);
+  --success-foreground: #ffffff;
+  --success-subtle: #e8f4ed;
+  --warning: #9a5b00;
+  --warning-foreground: #ffffff;
+  --warning-subtle: #fbf3e2;
+  --info: #1d5fbf;
+  --info-foreground: #ffffff;
+  --info-subtle: #eaf1fb;
   --border-neutral: #e8e7e3;
   --border: var(--border-neutral);
   --input: #dedcd6;
@@ -127,10 +146,17 @@
     0px 0px 0px 1px oklch(0 0 0 / 0.06),
     0px 1px 2px -1px oklch(0 0 0 / 0.06),
     0px 2px 4px 0px oklch(0 0 0 / 0.04);
+  --depth-border-hover:
+    0px 0px 0px 1px oklch(0 0 0 / 0.08),
+    0px 1px 2px -1px oklch(0 0 0 / 0.08),
+    0px 2px 4px 0px oklch(0 0 0 / 0.06);
+  --depth-popover:
+    0px 0px 0px 1px oklch(0 0 0 / 0.07),
+    0px 1px 2px 0px oklch(0 0 0 / 0.06),
+    0px 16px 36px -18px oklch(0 0 0 / 0.5);
 }
 
 @theme inline {
-  --shadow-border: var(--depth-border);
   --color-flvs-red: var(--flvs-red);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
@@ -145,32 +171,8 @@
   --color-step-3: var(--step-3);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
+  /* Our radius steps, not the contract's scale: these win over theme.css's
+     because they come later, and they are what every screen was drawn with. */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
