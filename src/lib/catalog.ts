@@ -38,3 +38,23 @@ export async function loadCatalog(workspaceId: string): Promise<CatalogRow[]> {
   `;
   return rows as CatalogRow[];
 }
+
+/**
+ * Sets a variant's counted stock, scoped to the workspace. Returns whether a
+ * row matched — false for another workspace's id. Shared by the catalogue's
+ * inline editor and the assistant's approved tool call.
+ */
+export async function setVariantStock(
+  workspaceId: string,
+  variantId: string,
+  onHand: number,
+): Promise<boolean> {
+  if (!sql) throw new Error("DATABASE_URL is not set");
+  const rows = await sql`
+    update bran.variants set on_hand = ${onHand}
+     where id = ${variantId}::uuid and workspace_id = ${workspaceId}
+    returning id
+  `;
+  return rows.length > 0;
+}
+

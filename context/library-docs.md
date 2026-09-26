@@ -61,10 +61,41 @@ Verified against the bundled docs in `node_modules/ai/docs` and
 - **Images:** `deepseek-v4-flash` is text-only. The provider docs route images through
   `deepseek-v4-flash-vision-exp` (experimental) with file parts and
   `providerOptions.deepseek.imageDetail`. Treat it as unproven until 07 tests it.
-- **Agents:** `ToolLoopAgent` and per-tool `needsApproval` are in the bundled docs
-  (`node_modules/ai/docs/03-agents`). Read them when 06 starts; nothing here yet.
-- **AI Elements** is not installed yet. Its usage pattern gets written here when 04–06
-  first install components, verified against what's installed.
+- **Agents (06):** `new ToolLoopAgent({ model, instructions, tools, toolApproval,
+  experimental_toolApprovalSecret, stopWhen: isStepCount(n), onEnd })`, built **per
+  request** so tools close over the session's workspace. In v7 approval is the agent's
+  `toolApproval` map (`'user-approval'`, or a function returning `{ type, reason }`), not a
+  per-tool `needsApproval`. A function's `reason` reaches the UI as
+  `part.approval.requestReason` — bran puts a server-computed summary there.
+- **Always set `experimental_toolApprovalSecret`.** With `useChat` the history is client
+  input; without the secret a crafted request can approve itself. Verified: a replayed
+  approval with its input changed is rejected; the genuine one executes.
+- **Route:** `createAgentUIStreamResponse({ agent, uiMessages, abortSignal })`. Client:
+  `useChat<InferAgentUIMessage<…>>({ transport: new DefaultChatTransport({ api }),
+  sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses })` and
+  `addToolApprovalResponse({ id, approved })`. Narrow parts with `isStaticToolUIPart` /
+  `getToolName`.
+- **Streaming can't go through `runAI`**; log from the agent's `onEnd` with
+  `event.totalUsage` via `logRun`.
+
+## AI Elements (elements.ai-sdk.dev)
+
+Installed 2026-09-26 for 06: `conversation`, `message`, `prompt-input`, `tool`,
+`confirmation`, `suggestion` in `src/components/ai-elements/`.
+
+- **Install:** `yes n | npx ai-elements@latest add <names>` — it asks to overwrite
+  existing shadcn files (`button`, `dialog`, …); answering "n" keeps ours. It also adds
+  shadcn pieces it depends on (`alert`, `collapsible`, `command`, `hover-card`,
+  `input-group`, `button-group`, `spinner`).
+- **Bring it onto tokens after installing.** `tool.tsx` shipped raw palette colours
+  (`text-green-600` …) → `text-success` / `text-info` / `text-warning` /
+  `text-destructive`; `code-block.tsx` shipped shiki dark-theme overrides (bran is
+  light-only) and a ref read during render (moved to state).
+- **Never import AI Elements into something every page renders.** `message.tsx`'s
+  `streamdown` ships maths (KaTeX), diagrams (mermaid), CJK and shiki plugins; with the
+  Assistant in the sidebar the dev bundle went from ~6 MB to 17.4 MB and pages stopped
+  hydrating in a background tab. bran strips the plugins (`streamdownPlugins = {}`) and
+  loads the chat with `next/dynamic` when the sheet opens.
 - **Testing:** pure modules take `model: LanguageModel` as an argument; tests pass
   `new MockLanguageModelV4({ doGenerate })` from `ai/test` and run under `node --test`.
 - **Model output is never trusted to decide.** It explains numbers the app computed;

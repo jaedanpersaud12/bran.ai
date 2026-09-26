@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { setVariantStock } from "@/lib/catalog";
 import { sql } from "@/lib/db";
 import {
   parseProduct,
@@ -157,12 +158,7 @@ export async function setStock(variantId: string, count: string): Promise<Action
   if (onHand === null) return { ok: false, errors: { onHand: "A whole number, 0 or more." } };
 
   try {
-    const rows = await sql`
-      update bran.variants set on_hand = ${onHand}
-       where id = ${variantId}::uuid and workspace_id = ${ws}
-      returning id
-    `;
-    if (rows.length === 0) return NOT_FOUND;
+    if (!(await setVariantStock(ws, variantId, onHand))) return NOT_FOUND;
   } catch (error) {
     return failure(error, "setStock");
   }
