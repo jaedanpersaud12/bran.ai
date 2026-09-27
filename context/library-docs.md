@@ -129,3 +129,18 @@ Installed 2026-09-26 for 06: `conversation`, `message`, `prompt-input`, `tool`,
 - **Model output is never trusted to decide.** It explains numbers the app computed;
   validate per item (known id, length, and — for restock — only numbers it was given) and
   fall back item by item.
+
+## UI primitives added in 08
+
+- **`@ja3dan/filter-chip` is built on Base UI (`@base-ui/react` `Menu`),** not Radix. Its
+  install adds `@base-ui/react` beside `radix-ui`. It works fine next to Radix dialogs and
+  menus. Its items are `role="menuitemradio"`; clear the filter with the chip's own
+  `aria-label="Clear {label} filter"` button.
+- **`alert-dialog` comes from shadcn (`@ja3dan/alert-dialog` 404s).** It shipped a raw
+  `bg-black/10` overlay; bran uses `bg-foreground/10`, the same as `dialog.tsx`.
+  `AlertDialogAction` takes `variant="destructive"`. Its radii are shadcn's
+  (`rounded-xl`), the same drift as `dialog.tsx`.
+- **Radix `Select` inside a scrolling `Dialog`:** the list positions its selected (or
+  first) item over the trigger. With nothing selected, the item under the pointer after
+  opening isn't the one at the trigger's position — pick options by their own box, not by
+  offset from the trigger.

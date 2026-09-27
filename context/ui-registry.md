@@ -75,3 +75,25 @@ keystroke, and the primary action disabled until every kept row is clean. The se
 errors are merged over the client's per row and cleared when that row is edited. The
 page-level fixed-height/pager rules don't apply inside a modal.
 
+
+### Order queue (list screen with a stat strip)
+
+File: src/app/(app)/orders/page.tsx, src/components/bran/OrdersTable.tsx, src/app/(app)/orders/loading.tsx
+Last updated: 2026-09-27
+Built from: `StatRow` (Page.tsx), @ja3dan/table-card, @ja3dan/status-pill, @ja3dan/filter-chip, shadcn alert-dialog
+
+| Property          | Value                                                                        |
+| ----------------- | ---------------------------------------------------------------------------- |
+| Page order        | `PageHeader` → four-up `StatRow` → `mt-6` table card                          |
+| Stats             | counts from the page's own load, each with a one-line note (no deltas yet)   |
+| Toolbar           | `FilterChip` "Status" on the left; secondary + primary buttons `ml-auto`      |
+| Columns           | ref + date (StackedCell) · customer + channel (StackedCell) · status pill · payment pill · items · total · `""` destination · `w-14` actions |
+| Status tones      | `STATUS_TONE` / `PAYMENT_TONE` in `src/lib/order-status.ts`, shared by every screen showing an order |
+| Row-action errors | in the `TableCardHeader` note (one truncated line, `text-negative`, `role="alert"`), never a band above the table |
+| Empty / filtered  | `EmptyState className="h-[719px] justify-center py-0"` — the height of the ten-row table it replaces |
+| Dates             | `timeZone: "America/Port_of_Spain"` on every `toLocale*` in a server-rendered client component |
+
+**Pattern notes:** A destructive confirm is an `AlertDialog` whose copy says exactly what
+happens to stock and restock ("3 units go back on the shelf…"), and changes when that's not
+true (an order that never took stock). A create modal marks itself dirty from its change
+handlers, and closing it while dirty asks "Discard this order?" first.

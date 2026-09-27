@@ -20,6 +20,11 @@ bearing:
 - **Every object bran writes to R2 is keyed under `R2_PREFIX`.** `src/lib/r2.ts`
   applies it; do not build keys by hand.
 
+Reading `public` is allowed where a feature needs the storefront's data, and only there:
+`src/lib/storefront-flvs.ts` selects from `public.orders` for the FLVS import (the
+workspace named by `FLVS_STOREFRONT_WORKSPACE`), and order history joins `public."user"`
+for names. Nothing in bran writes to `public`.
+
 Accounts are deliberately shared: one FLVS login works in both products.
 
 # Built on groundwork

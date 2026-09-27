@@ -18,47 +18,6 @@ import { formatMoney, formatMoneyWhole, type Delta } from "@/lib/metrics";
 export { formatMoney, formatMoneyWhole };
 export type { Delta };
 
-/* ------------------------------------------------------------------- Orders */
-
-export type FulfilmentState =
-  | "unpaid"
-  | "packing"
-  | "awaiting courier"
-  | "in transit"
-  | "delivered";
-
-export type Order = {
-  ref: string;
-  customer: string;
-  channel: "Instagram DM" | "WhatsApp" | "Storefront" | "TikTok";
-  items: number;
-  total: number;
-  state: FulfilmentState;
-  courier: string | null;
-  /** Where it is going, short enough for a table cell. */
-  destination: string;
-  placed: string;
-};
-
-export const ORDERS: Order[] = [
-  { ref: "BRN-4821", customer: "Aaliyah Mohammed", channel: "Instagram DM", items: 2, total: 640, state: "awaiting courier", courier: "Zoom TT", destination: "Woodbrook, POS", placed: "12 min ago" },
-  { ref: "BRN-4820", customer: "Kerry-Ann Charles", channel: "WhatsApp", items: 1, total: 295, state: "packing", courier: null, destination: "Chaguanas", placed: "38 min ago" },
-  { ref: "BRN-4819", customer: "Simone Baptiste", channel: "Storefront", items: 3, total: 985, state: "in transit", courier: "Zoom TT", destination: "San Fernando", placed: "2 h ago" },
-  { ref: "BRN-4818", customer: "Renee Ali", channel: "Instagram DM", items: 1, total: 310, state: "unpaid", courier: null, destination: "Arima", placed: "3 h ago" },
-  { ref: "BRN-4817", customer: "Deborah Sankar", channel: "TikTok", items: 2, total: 575, state: "in transit", courier: "Moving Solutions", destination: "Scarborough, TOB", placed: "5 h ago" },
-  { ref: "BRN-4816", customer: "Jenelle Roberts", channel: "Storefront", items: 4, total: 1_240, state: "delivered", courier: "Zoom TT", destination: "Diego Martin", placed: "Yesterday" },
-  { ref: "BRN-4815", customer: "Camille Joseph", channel: "WhatsApp", items: 1, total: 295, state: "delivered", courier: "Pickup", destination: "Collected in store", placed: "Yesterday" },
-];
-
-export const DISPATCH = {
-  /** Orders the dispatcher would hand to a courier on the next run. */
-  readyToDispatch: 6,
-  awaitingPayment: 3,
-  inTransit: 11,
-  /** Median hours from paid to handed over, over the last thirty days. */
-  medianHandoverHours: 4.2,
-};
-
 /* -------------------------------------------------------------- Storefronts */
 
 export type Storefront = {
