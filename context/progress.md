@@ -1,9 +1,9 @@
 # Progress
 
-**Stage:** 08 — Orders
-**Last completed:** 07 — Catalog import on `feat/07-catalog-import`
+**Stage:** 09 — Courier adapter
+**Last completed:** 08 — Orders on `feat/08-orders` (stacked on 07)
 **Active feature:** none
-**Next:** 08 orders
+**Next:** 09 courier adapter
 **Blocker:** none
 
 Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan.md`,
@@ -18,7 +18,7 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 - [x] **05** Purchase orders & supplier email
 - [x] **06** Ask bran (the real assistant)
 - [x] **07** Catalog import (text and photo)
-- [ ] **08** Orders
+- [x] **08** Orders
 - [ ] **09** Courier adapter
 - [ ] **10** Demand signals
 - [ ] **11** Instagram DMs + chatbot
@@ -36,6 +36,9 @@ Keep this short. Detail belongs in the feature's own folder — `spec.md`, `plan
 - Action for the client, not code: start Meta app review now (blocks 11 only).
 - 07 left test data in the `flvs-swim` demo workspace (6 imported variants — see its log)
   and open review minors (2, 4–10 in its `review.md`).
+- PR #8 (07) → 08's PR are stacked; merge in order. 08's test orders were removed.
+- 08 open minors are listed at the end of its `log.md`. `FLVS_STOREFRONT_WORKSPACE`
+  must be set in Vercel for the storefront import to appear in production.
 
 <!-- Anything that doesn't fit the status block above but matters across sessions:
      a rebase warning on an open branch, a decision that affects more than one

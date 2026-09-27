@@ -164,3 +164,86 @@ create table if not exists bran.restock_explanations (
   created_at    timestamptz not null default now(),
   primary key (workspace_id, variant_id)
 );
+
+-- ---------------------------------------------------------------- Orders --
+
+-- A customer's order, however it arrived: a DM or WhatsApp sale typed in, the
+-- FLVS storefront imported, later the DM bot. `number` is per workspace and
+-- shown as ORD-0001. Payment and fulfilment are separate: a cash-on-delivery
+-- order can be delivered and still unpaid.
+create table if not exists bran.orders (
+  id                  uuid primary key default gen_random_uuid(),
+  workspace_id        uuid not null references bran.workspaces (id) on delete cascade,
+  number              integer not null check (number > 0),
+  channel             text not null
+                      check (channel in ('instagram', 'whatsapp', 'tiktok', 'in_person', 'storefront', 'other')),
+  customer_name       text not null,
+  customer_phone      text,
+  delivery            text not null default 'courier' check (delivery in ('courier', 'pickup')),
+  area                text,
+  payment             text not null default 'unpaid' check (payment in ('paid', 'unpaid', 'cod')),
+  status              text not null default 'new'
+                      check (status in ('new', 'packed', 'shipped', 'delivered', 'cancelled')),
+  delivery_fee_cents  integer not null default 0 check (delivery_fee_cents >= 0),
+  notes               text,
+  -- Where an imported order came from, and its id there. Importing the same
+  -- order twice hits the unique constraint instead of doubling it.
+  external_source     text,
+  external_ref        text,
+  placed_at           timestamptz not null default now(),
+  created_by          text references public."user" (id) on delete set null,
+  created_at          timestamptz not null default now(),
+  unique (workspace_id, number),
+  unique (workspace_id, external_source, external_ref)
+);
+
+create index if not exists orders_workspace_status_idx on bran.orders (workspace_id, status);
+
+-- What was bought. A variant appears once per order; the price is what this
+-- customer paid, which can differ from the catalogue's.
+create table if not exists bran.order_lines (
+  order_id          uuid not null references bran.orders (id) on delete cascade,
+  variant_id        uuid not null references bran.variants (id) on delete restrict,
+  quantity          integer not null check (quantity between 1 and 999),
+  unit_price_cents  integer not null check (unit_price_cents >= 0),
+  primary key (order_id, variant_id)
+);
+
+create index if not exists order_lines_variant_idx on bran.order_lines (variant_id);
+
+-- Every change to an order, for the history in its detail view.
+create table if not exists bran.order_events (
+  id        bigint generated always as identity primary key,
+  order_id  uuid not null references bran.orders (id) on delete cascade,
+  kind      text not null
+            check (kind in ('created', 'imported', 'packed', 'shipped', 'delivered', 'paid', 'cancelled')),
+  by_user   text references public."user" (id) on delete set null,
+  at        timestamptz not null default now()
+);
+
+create index if not exists order_events_order_idx on bran.order_events (order_id, at);
+
+-- An order's sales, so cancelling it can take them back out of restock.
+-- Seeded and hand-entered sales have no order.
+alter table bran.sales
+  add column if not exists order_id uuid references bran.orders (id) on delete cascade;
+
+create index if not exists sales_order_idx on bran.sales (order_id);
+
+-- Which catalogue variant a storefront's item is. `item_key` is the
+-- storefront's product id plus the customer's choices, sorted
+-- (`flvs-kino|Colour=Jouvert|Size=XS`). Set once by the owner in the import
+-- preview and reused on every later import.
+create table if not exists bran.storefront_links (
+  workspace_id  uuid not null references bran.workspaces (id) on delete cascade,
+  source        text not null,
+  item_key      text not null,
+  variant_id    uuid not null references bran.variants (id) on delete cascade,
+  primary key (workspace_id, source, item_key)
+);
+
+-- Whether creating the order took its lines off the shelf. A storefront order
+-- imported after it had already shipped records its sales but leaves stock
+-- alone — those units were gone before the owner counted the shelf into bran —
+-- so cancelling it must not put them back.
+alter table bran.orders add column if not exists took_stock boolean not null default true;
